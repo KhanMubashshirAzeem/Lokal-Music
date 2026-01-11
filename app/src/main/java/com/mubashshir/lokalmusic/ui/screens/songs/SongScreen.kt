@@ -54,7 +54,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.ui.components.FullPlayer
 import com.mubashshir.lokalmusic.ui.components.MiniPlayer
-import com.mubashshir.lokalmusic.ui.screens.songs.SongViewModel
 import com.mubashshir.lokalmusic.data.model.Result as SongModel
 
 @Composable
