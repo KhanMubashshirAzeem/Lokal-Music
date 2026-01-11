@@ -17,11 +17,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.mubashshir.lokalmusic.ui.common.BottomNavItem
 import com.mubashshir.lokalmusic.ui.screens.favorites.FavoritesScreen
 import com.mubashshir.lokalmusic.ui.screens.home.HomeScreen
 import com.mubashshir.lokalmusic.ui.screens.playlists.PlaylistsScreen
 import com.mubashshir.lokalmusic.ui.screens.settings.SettingsScreen
-import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 
 
 @Composable
@@ -38,7 +38,7 @@ fun MainScreen(
 
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = PrimaryOrange) {
+            NavigationBar() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination =
                     navBackStackEntry?.destination

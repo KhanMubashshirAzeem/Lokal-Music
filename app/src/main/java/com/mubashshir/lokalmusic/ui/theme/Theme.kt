@@ -1,4 +1,3 @@
-// Theme.kt (updated)
 package com.mubashshir.lokalmusic.ui.theme
 
 import android.app.Activity
