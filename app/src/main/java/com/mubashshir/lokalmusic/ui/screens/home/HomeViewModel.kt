@@ -1,10 +1,14 @@
-
 package com.mubashshir.lokalmusic.ui.screens.home
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.SimpleArtist
+import com.mubashshir.lokalmusic.data.repository.SongRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HorizontalItem(
@@ -14,7 +18,10 @@ data class HorizontalItem(
 )
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val repository: SongRepository
+) : ViewModel()
+{
 
     private val _recentlyPlayed = MutableStateFlow<List<HorizontalItem>>(emptyList())
     val recentlyPlayed = _recentlyPlayed.asStateFlow()
@@ -26,38 +33,82 @@ class HomeViewModel @Inject constructor() : ViewModel() {
     val mostPlayed = _mostPlayed.asStateFlow()
 
     init {
-        loadDummyData()
+        fetchRecentlyPlayed()
+        fetchArtists()
+        fetchMostPlayed()
     }
 
-    private fun loadDummyData() {
-        _recentlyPlayed.value = listOf(
-            HorizontalItem(
-                "Shades of Love - Ania Szarmach..",
-                "Ania Szarmach",
-                "https://example.com/shades.jpg" // placeholder - use real URLs later
-            ),
-            HorizontalItem(
-                "Without You - The Kid LAROI",
-                "The Kid LAROI",
-                "https://example.com/nova.jpg"
-            ),
-            HorizontalItem(
-                "Save Your Tears The Weeknd",
-                "The Weeknd",
-                "https://example.com/astronaut.jpg"
-            )
-        )
+    private fun fetchRecentlyPlayed()
+    {
+        viewModelScope.launch {
+            repository.searchSongs("new songs")
+                .collect { result ->
+                    result.onSuccess { songs ->
+                        _recentlyPlayed.value =
+                            songs.map {
+                                mapSongToHorizontalItem(
+                                    it
+                                )
+                            }
+                    }
+                }
+        }
+    }
 
-        _artists.value = listOf(
-            HorizontalItem("Ariana Grande", "DANGEROUS WOMAN", "https://example.com/ariana.jpg"),
-            HorizontalItem("The Weeknd", "STARBOY", "https://example.com/weeknd.jpg"),
-            HorizontalItem("Acidrap", "", "https://example.com/acidrap.jpg")
-        )
+    private fun fetchArtists()
+    {
+        viewModelScope.launch {
+            repository.searchArtists("top artists")
+                .collect { result ->
+                    result.onSuccess { artistsList ->
+                        _artists.value =
+                            artistsList.map {
+                                mapArtistToHorizontalItem(
+                                    it
+                                )
+                            }
+                    }
+                }
+        }
+    }
 
-        _mostPlayed.value = listOf(
-            HorizontalItem("Ania", "Thinking Bout You", "https://example.com/ania.jpg"),
-            HorizontalItem("The Weeknd", "Dawn FM", "https://example.com/dawn.jpg"),
-            HorizontalItem("Romantic Echoes", "Fly Me To The Sun", "https://example.com/romantic.jpg")
+    private fun fetchMostPlayed()
+    {
+        viewModelScope.launch {
+            repository.searchSongs("top songs")
+                .collect { result ->
+                    result.onSuccess { songs ->
+                        _mostPlayed.value =
+                            songs.map {
+                                mapSongToHorizontalItem(
+                                    it
+                                )
+                            }
+                    }
+                }
+        }
+    }
+
+    private fun mapSongToHorizontalItem(song: Result): HorizontalItem
+    {
+        return HorizontalItem(
+            title = song.name,
+            subtitle = song.artists.primary.firstOrNull()?.name
+                ?: song.label,
+            imageUrl = song.image.find { it.quality == "500x500" }?.url
+                ?: song.image.lastOrNull()?.url
+                ?: ""
+        )
+    }
+
+    private fun mapArtistToHorizontalItem(artist: SimpleArtist): HorizontalItem
+    {
+        return HorizontalItem(
+            title = artist.name,
+            subtitle = artist.role,
+            imageUrl = artist.image.find { it.quality == "500x500" }?.url
+                ?: artist.image.lastOrNull()?.url
+                ?: ""
         )
     }
 }

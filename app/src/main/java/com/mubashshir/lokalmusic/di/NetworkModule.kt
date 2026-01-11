@@ -27,7 +27,7 @@ object NetworkModule {
     fun provideSongApiService(okHttpClient: OkHttpClient): SongApiService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(okHttpClient) // Use the client you verified
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(SongApiService::class.java)

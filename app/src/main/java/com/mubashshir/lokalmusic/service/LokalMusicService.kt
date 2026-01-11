@@ -11,7 +11,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LokalMusicService : MediaSessionService() {
 
-    // Now Hilt will provide this automatically from AudioModule
     @Inject
     lateinit var player: ExoPlayer
 

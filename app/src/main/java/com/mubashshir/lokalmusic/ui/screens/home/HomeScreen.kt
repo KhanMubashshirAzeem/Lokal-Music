@@ -1,4 +1,3 @@
-// ui/screens/home/HomeScreen.kt
 package com.mubashshir.lokalmusic.ui.screens.home
 
 import androidx.compose.animation.AnimatedContent
@@ -35,7 +34,7 @@ import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.AlbumsContent
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.ArtistsContent
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.FoldersContent
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.SuggestedContent
-import com.mubashshir.lokalmusic.ui.screens.songs.SongScreen
+import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.songs.SongScreen
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +57,6 @@ fun HomeScreen(
         "Folders"
     )
 
-    // Placeholder for search state (expand as needed)
     var isSearchActive by remember {
         mutableStateOf(
             false
@@ -66,7 +64,6 @@ fun HomeScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Top App Bar
         TopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -99,11 +96,7 @@ fun HomeScreen(
             }
         )
 
-        // Scrollable Tab Row
-        ScrollableTabRow(
-            selectedTabIndex = selectedTabIndex,
-            edgePadding = 0.dp // Adjust if needed
-        ) {
+        ScrollableTabRow(selectedTabIndex = selectedTabIndex) {
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = selectedTabIndex == index,
@@ -115,7 +108,6 @@ fun HomeScreen(
             }
         }
 
-        // Tab Content
         AnimatedContent(
             targetState = selectedTabIndex,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -123,12 +115,11 @@ fun HomeScreen(
         ) { tabIndex ->
             when (tabIndex)
             {
-                0 -> SuggestedContent(viewModel) // Existing "Suggested" content
-                1 -> SongScreen() // Implement as per
-                // previous SongsTab
-                2 -> ArtistsContent() // Placeholder
-                3 -> AlbumsContent() // Placeholder
-                4 -> FoldersContent() // Placeholder
+                0 -> SuggestedContent(viewModel)
+                1 -> SongScreen()
+                2 -> ArtistsContent()
+                3 -> AlbumsContent()
+                4 -> FoldersContent()
                 else ->
                 {
                 }

@@ -1,4 +1,3 @@
-// ui/screens/home/tab_screen/SuggestedContent.kt
 package com.mubashshir.lokalmusic.ui.screens.home.tab_screen
 
 import androidx.compose.foundation.clickable
@@ -32,13 +31,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.R
 import com.mubashshir.lokalmusic.ui.screens.home.HomeViewModel
 import com.mubashshir.lokalmusic.ui.screens.home.HorizontalItem
 
 @Composable
-fun SuggestedContent(viewModel: HomeViewModel) {
+fun SuggestedContent(
+    viewModel: HomeViewModel = hiltViewModel()
+)
+{
     val recentlyPlayed by viewModel.recentlyPlayed.collectAsState()
     val artists by viewModel.artists.collectAsState()
     val mostPlayed by viewModel.mostPlayed.collectAsState()
@@ -49,22 +52,18 @@ fun SuggestedContent(viewModel: HomeViewModel) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
-        // Header spacing
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Recently Played
         SectionHeader(title = "Recently Played", onSeeAllClick = { /* navigate */ })
         HorizontalCarousel(items = recentlyPlayed)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Artists
         SectionHeader(title = "Artists", onSeeAllClick = { /* navigate to Artists */ })
         HorizontalCarousel(items = artists)
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Most Played
         SectionHeader(title = "Most Played", onSeeAllClick = { /* navigate */ })
         HorizontalCarousel(items = mostPlayed)
 
@@ -91,7 +90,7 @@ fun SectionHeader(
         )
         Text(
             text = "See All",
-            color = MaterialTheme.colorScheme.primary, // orange
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.clickable { onSeeAllClick() }
         )
@@ -102,7 +101,7 @@ fun SectionHeader(
 fun HorizontalCarousel(items: List<HorizontalItem>) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = PaddingValues(vertical = 8.dp)
     ) {
         items(items) { item ->
             Column(
@@ -120,7 +119,9 @@ fun HorizontalCarousel(items: List<HorizontalItem>) {
                             )
                         ),
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.ic_place_holder) // add default
+                    placeholder = painterResource(
+                        R.drawable.ic_place_holder
+                    )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
