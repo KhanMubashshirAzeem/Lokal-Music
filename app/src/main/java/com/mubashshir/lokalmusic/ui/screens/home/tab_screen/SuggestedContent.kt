@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,6 +37,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.R
 import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.ui.components.ErrorView
+import com.mubashshir.lokalmusic.ui.components.LoadingView
 import com.mubashshir.lokalmusic.ui.screens.home.HomeViewModel
 import com.mubashshir.lokalmusic.ui.screens.home.HorizontalItem
 
@@ -46,7 +47,8 @@ import com.mubashshir.lokalmusic.ui.screens.home.HorizontalItem
 fun SuggestedContent(
     homeViewModel: HomeViewModel = hiltViewModel(),
     onArtistClick: (String) -> Unit = {},
-    onAlbumClick: (String) -> Unit = {}
+    onAlbumClick: (String) -> Unit = {},
+    onSongClick: (String) -> Unit = {} // Added: Handle song clicks specifically
 )
 {
     val homeUiState by homeViewModel.uiState.collectAsState()
@@ -55,12 +57,7 @@ fun SuggestedContent(
     {
         is UiState.Loading ->
         {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Loading...")
-            }
+            LoadingView(message = "Loading suggestions...")
         }
 
         is UiState.Success ->
@@ -69,22 +66,19 @@ fun SuggestedContent(
             SuggestedContentSuccess(
                 artists = data.artists,
                 mostPlayed = data.mostPlayed,
+                recentlyPlayed = data.recentlyPlayed,
                 onArtistClick = onArtistClick,
-                onAlbumClick = onAlbumClick
+                onAlbumClick = onAlbumClick,
+                onSongClick = onSongClick
             )
         }
 
         is UiState.Error   ->
         {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Error: ${state.message}",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
+            ErrorView(
+                message = state.message,
+                onRetry = { /* Optional: Add retry logic in ViewModel */ }
+            )
         }
     }
 }
@@ -93,8 +87,10 @@ fun SuggestedContent(
 private fun SuggestedContentSuccess(
     artists: List<HorizontalItem>,
     mostPlayed: List<HorizontalItem>,
+    recentlyPlayed: List<HorizontalItem>,
     onArtistClick: (String) -> Unit,
-    onAlbumClick: (String) -> Unit
+    onAlbumClick: (String) -> Unit,
+    onSongClick: (String) -> Unit
 )
 {
     Column(
@@ -105,50 +101,55 @@ private fun SuggestedContentSuccess(
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Recently Played - Placeholder
-        SectionHeader(
-            title = "Recently Played",
-            onSeeAllClick = {})
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "No recently played songs yet",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        // Recently Played (Songs)
+        if (recentlyPlayed.isNotEmpty())
+        {
+            SectionHeader(
+                title = "Recently Played",
+                onSeeAllClick = {}
             )
+            HorizontalCarousel(
+                items = recentlyPlayed,
+                onItemClick = { item ->
+                    // Logic: This is a song, so we play it
+                    onSongClick(item.id)
+                }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        // Artists
+        if (artists.isNotEmpty())
+        {
+            SectionHeader(
+                title = "Artists",
+                onSeeAllClick = {}
+            )
+            HorizontalCarousel(
+                items = artists,
+                onItemClick = { item ->
+                    // Logic: This is an artist, navigate to Artist Details
+                    onArtistClick(item.id)
+                }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        SectionHeader(
-            title = "Artists",
-            onSeeAllClick = {})
-        HorizontalCarousel(
-            items = artists,
-            onItemClick = { item ->
-                onArtistClick(
-                    item.id
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        SectionHeader(
-            title = "Most Played",
-            onSeeAllClick = {})
-        HorizontalCarousel(
-            items = mostPlayed,
-            onItemClick = { item ->
-                onAlbumClick(
-                    item.id
-                )
-            }
-        )
+        // Most Played (Songs)
+        if (mostPlayed.isNotEmpty())
+        {
+            SectionHeader(
+                title = "Most Played",
+                onSeeAllClick = {}
+            )
+            HorizontalCarousel(
+                items = mostPlayed,
+                onItemClick = { item ->
+                    // Logic: This is a song, so we play it
+                    onSongClick(item.id)
+                }
+            )
+        }
 
         Spacer(modifier = Modifier.height(100.dp))
     }
@@ -186,22 +187,8 @@ fun HorizontalCarousel(
     onItemClick: (HorizontalItem) -> Unit
 )
 {
-    if (items.isEmpty())
-    {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "No items available",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        return
-    }
+    // Note: We handled Empty checks in the parent, but double check here doesn't hurt
+    if (items.isEmpty()) return
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),

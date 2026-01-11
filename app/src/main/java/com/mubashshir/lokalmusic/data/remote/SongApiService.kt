@@ -41,8 +41,12 @@ interface SongApiService {
         @Query("query") query: String
     ): PlaylistsApiResponse
 
-    @GET("api/artists/{id}/songs")
+    // CHANGED: From @Path("id") to @Query("id") based on Postman snippet "api/artists/songs"
+    // This will generate: https://saavn.sumit.co/api/artists/songs?id={artistId}
+    @GET("api/artists/songs")
     suspend fun getArtistSongs(
-        @retrofit2.http.Path("id") id: String
+        @Query("id") id: String,
+        @Query("page") page: Int = 1, // Optional: Added page/cat just in case, defaults to safe values
+        @Query("category") category: String = "alphabetical"
     ): SongsApiResponce
 }

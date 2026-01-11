@@ -1,6 +1,7 @@
 package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -156,6 +157,11 @@ fun ArtistsContent(
                     contentPadding = PaddingValues(horizontal = PaddingMedium)
                 ) {
                     items(artists) { artist ->
+//                        // We are getting the
+//                        // artist id correctly
+//                        Log.d(
+//                            "Artist_id", artist.id
+//                        )
                         ArtistItem(
                             artist = artist,
                             onClick = {

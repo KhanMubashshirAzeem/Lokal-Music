@@ -47,54 +47,26 @@ fun HomeScreen(
     onNavigateToArtist: (String) -> Unit = {},
     onNavigateToAlbum: (String) -> Unit = {},
     onNavigateToFullPlayer: () -> Unit = {}
-)
-{
-    var selectedTabIndex by remember {
-        mutableIntStateOf(
-            0
-        )
-    }
-
-    val tabs = listOf(
-        "Suggested",
-        "Songs",
-        "Artists",
-        "Albums"
-    )
+) {
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("Suggested", "Songs", "Artists", "Albums")
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Top App Bar
         TopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.MusicNote,
-                        contentDescription = null,
-                        tint = PrimaryOrange
-                    )
-                    Spacer(
-                        modifier = Modifier.width(
-                            8.dp
-                        )
-                    )
-                    Text(
-                        text = "Mume",
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    Icon(Icons.Default.MusicNote, contentDescription = null, tint = PrimaryOrange)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Mume", style = MaterialTheme.typography.titleLarge)
                 }
             },
             actions = {
                 IconButton(onClick = onNavigateToSearch) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = PrimaryOrange
-                    )
+                    Icon(Icons.Default.Search, contentDescription = "Search", tint = PrimaryOrange)
                 }
             }
         )
 
-        // Tabs
         ScrollableTabRow(
             selectedTabIndex = selectedTabIndex,
             containerColor = MaterialTheme.colorScheme.surface
@@ -102,46 +74,37 @@ fun HomeScreen(
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = selectedTabIndex == index,
-                    onClick = {
-                        selectedTabIndex = index
-                    },
+                    onClick = { selectedTabIndex = index },
                     text = {
                         Text(
                             text = title,
-                            color = if (selectedTabIndex == index)
-                                PrimaryOrange
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (selectedTabIndex == index) PrimaryOrange else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 )
             }
         }
 
-        // Content
         AnimatedContent(
             targetState = selectedTabIndex,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             modifier = Modifier.fillMaxSize(),
             label = "tab_animation"
         ) { tabIndex ->
-            when (tabIndex)
-            {
+            when (tabIndex) {
                 0 -> SuggestedContent(
                     homeViewModel = viewModel,
                     onArtistClick = onNavigateToArtist,
-                    onAlbumClick = onNavigateToAlbum
+                    onAlbumClick = onNavigateToAlbum,
+                    // FIXED: Handle song click to start playback
+                    onSongClick = { songId ->
+                        viewModel.playSong(songId)
+                    }
                 )
 
                 1 -> SongScreen()
-
-                2 -> ArtistsContent(
-                    onNavigateToArtist = onNavigateToArtist
-                )
-
-                3 -> AlbumsContent(
-                    onNavigateToAlbum = onNavigateToAlbum
-                )
+                2 -> ArtistsContent(onNavigateToArtist = onNavigateToArtist)
+                3 -> AlbumsContent(onNavigateToAlbum = onNavigateToAlbum)
             }
         }
     }

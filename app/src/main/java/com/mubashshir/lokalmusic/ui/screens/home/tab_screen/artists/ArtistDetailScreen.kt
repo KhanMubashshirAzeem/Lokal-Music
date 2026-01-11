@@ -2,7 +2,6 @@ package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,6 +34,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.R
 import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.ui.components.EmptyView
+import com.mubashshir.lokalmusic.ui.components.ErrorView
+import com.mubashshir.lokalmusic.ui.components.LoadingView
 import com.mubashshir.lokalmusic.ui.components.SongList
 import com.mubashshir.lokalmusic.ui.screens.artist.ArtistDetailViewModel
 import com.mubashshir.lokalmusic.ui.theme.PaddingLarge
@@ -73,64 +74,31 @@ fun ArtistDetailScreen(
             )
         }
     ) { paddingValues ->
+        val modifier =
+            Modifier.padding(paddingValues)
+
         when (val state = uiState)
         {
             is UiState.Loading ->
             {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Loading...",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                LoadingView(modifier = modifier)
             }
 
             is UiState.Success ->
             {
                 val data = state.data
 
-                // CHECK: Handle the case where the API returns success but no songs
                 if (data.songs.isEmpty())
                 {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                modifier = Modifier.size(
-                                    64.dp
-                                ),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(
-                                modifier = Modifier.height(
-                                    16.dp
-                                )
-                            )
-                            Text(
-                                text = "No songs found for this artist",
-                                style = MaterialTheme.typography.titleMedium,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
+                    EmptyView(
+                        message = "No songs found for this artist",
+                        modifier = modifier
+                    )
                 } else
                 {
-                    // Regular View (when songs exist)
+                    // Content View
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
+                        modifier = modifier.fillMaxSize()
                     ) {
                         // Artist Header
                         Column(
@@ -192,21 +160,15 @@ fun ArtistDetailScreen(
 
             is UiState.Error   ->
             {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            "Error: ${state.message}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
+                ErrorView(
+                    message = state.message,
+                    modifier = modifier,
+                    onRetry = {
+                        viewModel.loadArtist(
+                            artistId
                         )
                     }
-                }
+                )
             }
         }
     }
