@@ -1,8 +1,10 @@
 package com.mubashshir.lokalmusic.data.repository
 
 import com.mubashshir.lokalmusic.data.remote.SongApiService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 import com.mubashshir.lokalmusic.data.model.Result as SongModel
 
@@ -42,5 +44,7 @@ class SongRepositoryImpl @Inject constructor(
             {
                 emit(kotlin.Result.failure(e))
             }
-        }
+        }.flowOn(
+            Dispatchers.IO
+        )
 }
