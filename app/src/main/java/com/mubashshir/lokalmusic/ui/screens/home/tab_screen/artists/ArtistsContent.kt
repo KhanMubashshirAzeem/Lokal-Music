@@ -1,5 +1,7 @@
 package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,9 +47,12 @@ import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
 import com.mubashshir.lokalmusic.ui.theme.PaddingSmall
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 
+@RequiresApi(Build.VERSION_CODES.O)
+
 @Composable
 fun ArtistsContent(
-    viewModel: ArtistsViewModel = hiltViewModel()
+    viewModel: ArtistsViewModel = hiltViewModel(),
+    onNavigateToArtist: (String) -> Unit = {}
 ) {
     val artists by viewModel.artists.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -65,7 +70,10 @@ fun ArtistsContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = PaddingMedium, vertical = PaddingSmall),
+                .padding(
+                    horizontal = PaddingMedium,
+                    vertical = PaddingSmall
+                ),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -148,7 +156,14 @@ fun ArtistsContent(
                     contentPadding = PaddingValues(horizontal = PaddingMedium)
                 ) {
                     items(artists) { artist ->
-                        ArtistItem(artist = artist)
+                        ArtistItem(
+                            artist = artist,
+                            onClick = {
+                                onNavigateToArtist(
+                                    artist.id
+                                )
+                            }
+                        )
                         Spacer(modifier = Modifier.height(PaddingMedium))
                     }
                     item {
@@ -161,11 +176,15 @@ fun ArtistsContent(
 }
 
 @Composable
-private fun ArtistItem(artist: SimpleArtist) {
+private fun ArtistItem(
+    artist: SimpleArtist,
+    onClick: () -> Unit = {}
+)
+{
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Navigate to artist detail */ },
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(

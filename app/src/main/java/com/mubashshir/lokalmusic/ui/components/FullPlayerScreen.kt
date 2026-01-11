@@ -1,6 +1,7 @@
 package com.mubashshir.lokalmusic.ui.components
 
-import androidx.compose.foundation.background
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,32 +27,52 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.mubashshir.lokalmusic.data.model.Result as SongModel
+import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
+import com.mubashshir.lokalmusic.ui.viewmodel.PlayerViewModel
 
 /**
- * A reusable Full Screen Player component.
+ * Full-screen player screen that uses PlayerViewModel.
+ * This is a separate navigation route, not rendered inside Scaffold.
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FullPlayer(
-    song: SongModel,
-    isPlaying: Boolean,
-    onTogglePlayPause: () -> Unit,
-    onSkipNext: () -> Unit,
-    onSkipPrevious: () -> Unit,
-    onSeek: (Float) -> Unit, // Add seek callback
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun FullPlayerScreen(
+    onNavigateBack: () -> Unit,
+    playerViewModel: PlayerViewModel = hiltViewModel()
+)
+{
+    val currentSong by playerViewModel.currentSong.collectAsState()
+    val isPlaying by playerViewModel.isPlaying.collectAsState()
+    val playbackPosition by playerViewModel.playbackPosition.collectAsState()
+    val duration by playerViewModel.duration.collectAsState()
+
+    if (currentSong == null)
+    {
+        // No song playing, go back
+        onNavigateBack()
+        return
+    }
+
+    val progress = if (duration > 0)
+    {
+        playbackPosition.toFloat() / duration.toFloat()
+    } else
+    {
+        0f
+    }
+
     Surface(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
@@ -60,49 +81,52 @@ fun FullPlayer(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Header (Close Button)
+            // Header (Close Button)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start
             ) {
-                IconButton(onClick = onClose) {
+                IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Collapse Player",
-                        modifier = Modifier.size(32.dp)
+                        contentDescription = "Close Player",
+                        modifier = Modifier.size(
+                            32.dp
+                        )
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Big Album Art
+            // Big Album Art
             AsyncImage(
-                model = song.image.lastOrNull()?.url,
+                model = currentSong!!.image.find { it.quality == "500x500" }?.url
+                    ?: currentSong!!.image.firstOrNull()?.url,
                 contentDescription = "Album Art",
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .aspectRatio(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.Gray),
+                    .clip(RoundedCornerShape(24.dp)),
                 contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 3. Title and Artist
+            // Title and Artist
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = song.name,
+                    text = currentSong!!.name,
                     style = MaterialTheme.typography.headlineMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = song.artists.primary.firstOrNull()?.name ?: song.label,
+                    text = currentSong!!.artists.primary.firstOrNull()?.name
+                        ?: currentSong!!.label,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -112,52 +136,95 @@ fun FullPlayer(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // 4. Seekbar (Placeholder for now - progress needed from ViewModel)
-            // We'll assume progress is 0f to 1f for now
+            // Seekbar
             Slider(
-                value = 0.3f, // DUMMY VALUE
-                onValueChange = { onSeek(it) },
+                value = progress,
+                onValueChange = { newProgress ->
+                    playerViewModel.seekTo(
+                        newProgress
+                    )
+                },
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("1:23", style = MaterialTheme.typography.bodySmall) // Dummy start time
-                Text("4:56", style = MaterialTheme.typography.bodySmall) // Dummy end time
+                Text(
+                    formatTime(playbackPosition),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    formatTime(duration),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 5. Controls Row
+            // Controls Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onSkipPrevious, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.Default.SkipPrevious, contentDescription = "Previous", modifier = Modifier.size(36.dp))
+                IconButton(
+                    onClick = { playerViewModel.skipPrevious() },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.SkipPrevious,
+                        contentDescription = "Previous",
+                        modifier = Modifier.size(
+                            36.dp
+                        )
+                    )
                 }
 
-                // Main Play/Pause Button (Larger)
+                // Main Play/Pause Button
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(72.dp).clickable { onTogglePlayPause() }
+                    color = PrimaryOrange,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clickable { playerViewModel.togglePlayPause() }
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(16.dp).fillMaxSize()
+                        modifier = Modifier.padding(
+                            16.dp
+                        )
                     )
                 }
 
-                IconButton(onClick = onSkipNext, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.Default.SkipNext, contentDescription = "Next", modifier = Modifier.size(36.dp))
+                IconButton(
+                    onClick = { playerViewModel.skipNext() },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.SkipNext,
+                        contentDescription = "Next",
+                        modifier = Modifier.size(
+                            36.dp
+                        )
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(48.dp))
         }
     }
+}
+
+private fun formatTime(timeMs: Long): String
+{
+    val totalSeconds = (timeMs / 1000).toInt()
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format(
+        "%02d:%02d",
+        minutes,
+        seconds
+    )
 }

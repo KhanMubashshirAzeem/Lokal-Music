@@ -40,4 +40,9 @@ interface SongApiService {
     suspend fun searchPlaylists(
         @Query("query") query: String
     ): PlaylistsApiResponse
+
+    @GET("api/artists/{id}/songs")
+    suspend fun getArtistSongs(
+        @retrofit2.http.Path("id") id: String
+    ): SongsApiResponce
 }

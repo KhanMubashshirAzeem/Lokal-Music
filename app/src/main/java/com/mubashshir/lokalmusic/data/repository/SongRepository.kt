@@ -23,4 +23,6 @@ interface SongRepository {
     fun searchAlbums(query: String): Flow<kotlin.Result<List<SimpleAlbum>>>
 
     fun searchPlaylists(query: String): Flow<kotlin.Result<List<SimplePlaylist>>>
+
+    fun getArtistSongs(artistId: String): Flow<kotlin.Result<List<SongModel>>>
 }

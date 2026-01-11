@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.common
+package com.mubashshir.lokalmusic.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite

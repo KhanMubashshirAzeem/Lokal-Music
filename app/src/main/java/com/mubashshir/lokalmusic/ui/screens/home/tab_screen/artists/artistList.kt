@@ -1,5 +1,5 @@
 // ui/screens/artists/ArtistsScreen.kt (new)
-package com.mubashshir.lokalmusic.ui.screens.artist
+package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.screens.playlists
+package com.mubashshir.lokalmusic.ui.screens
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

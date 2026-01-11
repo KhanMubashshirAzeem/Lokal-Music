@@ -1,5 +1,7 @@
 package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.album
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,9 +46,11 @@ import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
 import com.mubashshir.lokalmusic.ui.theme.PaddingSmall
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AlbumsContent(
-    viewModel: AlbumsViewModel = hiltViewModel()
+    viewModel: AlbumsViewModel = hiltViewModel(),
+    onNavigateToAlbum: (String) -> Unit = {}
 ) {
     val albums by viewModel.albums.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -153,7 +157,10 @@ fun AlbumsContent(
                     verticalArrangement = Arrangement.spacedBy(PaddingMedium)
                 ) {
                     items(albums) { album ->
-                        AlbumItem(album = album)
+                        AlbumItem(
+                            album = album,
+                            onClick = { onNavigateToAlbum(album.id) }
+                        )
                     }
                     item {
                         Spacer(modifier = Modifier.height(100.dp)) // Space for mini player
@@ -165,11 +172,14 @@ fun AlbumsContent(
 }
 
 @Composable
-private fun AlbumItem(album: SimpleAlbum) {
+private fun AlbumItem(
+    album: SimpleAlbum,
+    onClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Navigate to album detail */ }
+            .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = album.image.find { it.quality == "500x500" }?.url

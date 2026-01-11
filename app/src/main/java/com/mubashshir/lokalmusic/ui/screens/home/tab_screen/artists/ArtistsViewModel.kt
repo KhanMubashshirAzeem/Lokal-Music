@@ -1,6 +1,6 @@
 package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists
 
-import androidx.lifecycle.ViewModel
+import  androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mubashshir.lokalmusic.data.model.SimpleArtist
 import com.mubashshir.lokalmusic.data.repository.SongRepository
