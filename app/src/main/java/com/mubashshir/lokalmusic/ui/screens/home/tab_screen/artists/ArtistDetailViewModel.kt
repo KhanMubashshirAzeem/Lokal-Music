@@ -46,27 +46,35 @@ class ArtistDetailViewModel @Inject constructor(
         }
     }
 
-    fun loadArtist(artistId: String) {
+    // CHANGED: The argument is now treated as a 'query' (Artist Name)
+    fun loadArtist(query: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
 
-            repository.getArtistSongs(artistId)
+            // CHANGED: Use searchSongs with the query (Name) instead of getArtistSongs(ID)
+            repository.searchSongs(query)
                 .collectLatest { result ->
                     result.onSuccess { songs ->
                         if (songs.isNotEmpty()) {
+                            // We extract artist info from the first song in the result
                             val firstSong = songs.first()
+
+                            // Try to find the exact artist match in the song's artists, otherwise default to first
+                            val artistObj = firstSong.artists.primary.find {
+                                it.name.equals(query, ignoreCase = true)
+                            } ?: firstSong.artists.primary.firstOrNull()
+
                             _uiState.value = UiState.Success(
                                 ArtistDetailData(
-                                    artistName = firstSong.artists.primary.firstOrNull()?.name
-                                        ?: "Unknown Artist",
+                                    artistName = artistObj?.name ?: query,
                                     artistImageUrl = firstSong.image.find { it.quality == "500x500" }?.url
-                                        ?: "",
+                                        ?: firstSong.image.firstOrNull()?.url ?: "",
                                     songs = songs,
                                     songCount = songs.size
                                 )
                             )
                         } else {
-                            _uiState.value = UiState.Error("No songs found for this artist")
+                            _uiState.value = UiState.Error("No songs found for '$query'")
                         }
                     }.onFailure {
                         _uiState.value = UiState.Error(it.message ?: "Failed to load artist")
@@ -74,7 +82,6 @@ class ArtistDetailViewModel @Inject constructor(
                 }
         }
     }
-
     // UPDATED: Plays the specific song but includes the whole list in the queue
     fun playSong(song: Result) {
         val currentState = _uiState.value

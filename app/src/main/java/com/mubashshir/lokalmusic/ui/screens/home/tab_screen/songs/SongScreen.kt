@@ -74,7 +74,7 @@ fun SongScreen(
 
     // Load songs on first composition
     LaunchedEffect(Unit) {
-        viewModel.searchSongs("trending")
+        viewModel.searchSongs("arijit")
     }
 
     Column(modifier = Modifier.fillMaxSize()) {

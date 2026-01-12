@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.viewmodel
+package com.mubashshir.lokalmusic.ui.player
 
 import android.os.Build
 import androidx.annotation.RequiresApi

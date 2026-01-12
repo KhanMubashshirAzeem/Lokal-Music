@@ -166,7 +166,7 @@ fun ArtistsContent(
                             artist = artist,
                             onClick = {
                                 onNavigateToArtist(
-                                    artist.id
+                                    artist.name
                                 )
                             }
                         )

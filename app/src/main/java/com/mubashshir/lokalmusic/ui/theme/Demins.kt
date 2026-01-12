@@ -5,9 +5,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // Paddings
-val PaddingSmall = 8.dp
-val PaddingMedium = 16.dp
-val PaddingLarge = 24.dp
+val PaddingSmall = 4.dp
+val PaddingMedium = 8.dp
+val PaddingLarge = 16.dp
 
 // Corners
 val CornerSmall = 8.dp

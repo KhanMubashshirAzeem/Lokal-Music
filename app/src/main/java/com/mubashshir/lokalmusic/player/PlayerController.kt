@@ -30,7 +30,7 @@ import javax.inject.Singleton
 @Singleton
 @RequiresApi(Build.VERSION_CODES.O)
 class PlayerController @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 )
 {
 
@@ -178,7 +178,7 @@ class PlayerController @Inject constructor(
                             controller.currentPosition
                     }
                 }
-                delay(1000) // Update every second
+                delay(500) // Update every second
             }
         }
     }

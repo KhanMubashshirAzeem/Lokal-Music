@@ -43,7 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
-import com.mubashshir.lokalmusic.ui.viewmodel.PlayerViewModel
+import com.mubashshir.lokalmusic.ui.player.PlayerViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

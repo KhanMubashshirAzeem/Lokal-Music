@@ -36,11 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.R
-import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.ui.components.ErrorView
 import com.mubashshir.lokalmusic.ui.components.LoadingView
 import com.mubashshir.lokalmusic.ui.screens.home.HomeViewModel
 import com.mubashshir.lokalmusic.ui.screens.home.HorizontalItem
+import com.mubashshir.lokalmusic.util.UiState
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -48,7 +48,8 @@ fun SuggestedContent(
     homeViewModel: HomeViewModel = hiltViewModel(),
     onArtistClick: (String) -> Unit = {},
     onAlbumClick: (String) -> Unit = {},
-    onSongClick: (String) -> Unit = {} // Added: Handle song clicks specifically
+    onSongClick: (String) -> Unit = {},
+    onSeeAllArtists: () -> Unit = {} // Added Callback
 )
 {
     val homeUiState by homeViewModel.uiState.collectAsState()
@@ -69,7 +70,8 @@ fun SuggestedContent(
                 recentlyPlayed = data.recentlyPlayed,
                 onArtistClick = onArtistClick,
                 onAlbumClick = onAlbumClick,
-                onSongClick = onSongClick
+                onSongClick = onSongClick,
+                onSeeAllArtists = onSeeAllArtists
             )
         }
 
@@ -77,7 +79,7 @@ fun SuggestedContent(
         {
             ErrorView(
                 message = state.message,
-                onRetry = { /* Optional: Add retry logic in ViewModel */ }
+                onRetry = { /* Optional */ }
             )
         }
     }
@@ -90,7 +92,8 @@ private fun SuggestedContentSuccess(
     recentlyPlayed: List<HorizontalItem>,
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
-    onSongClick: (String) -> Unit
+    onSongClick: (String) -> Unit,
+    onSeeAllArtists: () -> Unit
 )
 {
     Column(
@@ -101,7 +104,7 @@ private fun SuggestedContentSuccess(
     ) {
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Recently Played (Songs)
+        // Recently Played
         if (recentlyPlayed.isNotEmpty())
         {
             SectionHeader(
@@ -111,8 +114,9 @@ private fun SuggestedContentSuccess(
             HorizontalCarousel(
                 items = recentlyPlayed,
                 onItemClick = { item ->
-                    // Logic: This is a song, so we play it
-                    onSongClick(item.id)
+                    onSongClick(
+                        item.id
+                    )
                 }
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -123,19 +127,19 @@ private fun SuggestedContentSuccess(
         {
             SectionHeader(
                 title = "Artists",
-                onSeeAllClick = {}
+                onSeeAllClick = onSeeAllArtists // Trigger callback
             )
             HorizontalCarousel(
                 items = artists,
                 onItemClick = { item ->
-                    // Logic: This is an artist, navigate to Artist Details
-                    onArtistClick(item.id)
+                    // CHANGED: Pass item.title (Name) instead of ID for search
+                    onArtistClick(item.title)
                 }
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Most Played (Songs)
+        // Most Played
         if (mostPlayed.isNotEmpty())
         {
             SectionHeader(
@@ -145,8 +149,9 @@ private fun SuggestedContentSuccess(
             HorizontalCarousel(
                 items = mostPlayed,
                 onItemClick = { item ->
-                    // Logic: This is a song, so we play it
-                    onSongClick(item.id)
+                    onSongClick(
+                        item.id
+                    )
                 }
             )
         }
@@ -187,7 +192,6 @@ fun HorizontalCarousel(
     onItemClick: (HorizontalItem) -> Unit
 )
 {
-    // Note: We handled Empty checks in the parent, but double check here doesn't hurt
     if (items.isEmpty()) return
 
     LazyRow(

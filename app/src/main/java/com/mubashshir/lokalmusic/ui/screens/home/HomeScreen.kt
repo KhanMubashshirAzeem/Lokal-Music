@@ -40,12 +40,18 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToArtist: (String) -> Unit = {},
+    onNavigateToArtist: (String) -> Unit = {}, // This String is now the Artist Name
     onNavigateToAlbum: (String) -> Unit = {},
     onNavigateToFullPlayer: () -> Unit = {}
 ) {
-    val tabs = listOf("Suggested", "Songs", "Artists", "Albums")
-
+    val tabs = listOf(
+        "Suggested",
+        "Songs",
+        "Artists",
+        "Albums",
+        "Recently Played",
+        "Most Played"
+    )
     val pagerState =
         rememberPagerState { tabs.size }
     val scope = rememberCoroutineScope()
@@ -95,10 +101,7 @@ fun HomeScreen(
                     text = {
                         Text(
                             text = title,
-                            color = if (pagerState.currentPage == index)
-                                PrimaryOrange
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (pagerState.currentPage == index) PrimaryOrange else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 )
@@ -116,7 +119,17 @@ fun HomeScreen(
                     onArtistClick = onNavigateToArtist,
                     onAlbumClick = onNavigateToAlbum,
                     onSongClick = { songId ->
-                        viewModel.playSong(songId)
+                        viewModel.playSong(
+                            songId
+                        )
+                    },
+                    onSeeAllArtists = {
+                        // Switch to "Artists" tab (index 2)
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                2
+                            )
+                        }
                     }
                 )
 
@@ -129,6 +142,7 @@ fun HomeScreen(
                 3 -> AlbumsContent(
                     onNavigateToAlbum = onNavigateToAlbum
                 )
+
             }
         }
     }
