@@ -1,8 +1,10 @@
 package com.mubashshir.lokalmusic.ui.screens.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.data.model.Result
 import com.mubashshir.lokalmusic.data.model.SimpleArtist
 import com.mubashshir.lokalmusic.data.repository.SongRepository
@@ -126,6 +128,7 @@ class HomeViewModel @Inject constructor(
     }
 
     // 3. New function to play song by ID
+    @RequiresApi(Build.VERSION_CODES.O)
     fun playSong(songId: String)
     {
         val song = songCache[songId]

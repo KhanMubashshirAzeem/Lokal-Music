@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.components
+package com.mubashshir.lokalmusic.ui.viewmodel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
-import com.mubashshir.lokalmusic.ui.viewmodel.PlayerViewModel
 
 /**
  * Mini Player component that uses PlayerViewModel as single source of truth.

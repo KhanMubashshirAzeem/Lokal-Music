@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.components
+package com.mubashshir.lokalmusic.ui.components // Note: Package fixed to match standard components
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -18,12 +18,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOne
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,14 +40,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.Player
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 import com.mubashshir.lokalmusic.ui.viewmodel.PlayerViewModel
 
-/**
- * Full-screen player screen that uses PlayerViewModel.
- * This is a separate navigation route, not rendered inside Scaffold.
- */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FullPlayerScreen(
@@ -56,20 +57,18 @@ fun FullPlayerScreen(
     val playbackPosition by playerViewModel.playbackPosition.collectAsState()
     val duration by playerViewModel.duration.collectAsState()
 
+    // NEW: Observe Shuffle and Repeat states
+    val shuffleMode by playerViewModel.shuffleMode.collectAsState()
+    val repeatMode by playerViewModel.repeatMode.collectAsState()
+
     if (currentSong == null)
     {
-        // No song playing, go back
         onNavigateBack()
         return
     }
 
-    val progress = if (duration > 0)
-    {
-        playbackPosition.toFloat() / duration.toFloat()
-    } else
-    {
-        0f
-    }
+    val progress =
+        if (duration > 0) playbackPosition.toFloat() / duration.toFloat() else 0f
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -81,7 +80,7 @@ fun FullPlayerScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header (Close Button)
+            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start
@@ -99,7 +98,7 @@ fun FullPlayerScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Big Album Art
+            // Album Art
             AsyncImage(
                 model = currentSong!!.image.find { it.quality == "500x500" }?.url
                     ?: currentSong!!.image.firstOrNull()?.url,
@@ -113,7 +112,7 @@ fun FullPlayerScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Title and Artist
+            // Info
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start
@@ -139,12 +138,16 @@ fun FullPlayerScreen(
             // Seekbar
             Slider(
                 value = progress,
-                onValueChange = { newProgress ->
+                onValueChange = {
                     playerViewModel.seekTo(
-                        newProgress
+                        it
                     )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = SliderDefaults.colors(
+                    thumbColor = PrimaryOrange,
+                    activeTrackColor = PrimaryOrange
+                )
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -162,12 +165,25 @@ fun FullPlayerScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Controls Row
+            // Controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Shuffle
+                IconButton(onClick = { playerViewModel.toggleShuffle() }) {
+                    Icon(
+                        imageVector = Icons.Default.Shuffle,
+                        contentDescription = "Shuffle",
+                        tint = if (shuffleMode) PrimaryOrange else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(
+                            24.dp
+                        )
+                    )
+                }
+
+                // Previous
                 IconButton(
                     onClick = { playerViewModel.skipPrevious() },
                     modifier = Modifier.size(48.dp)
@@ -181,7 +197,7 @@ fun FullPlayerScreen(
                     )
                 }
 
-                // Main Play/Pause Button
+                // Play/Pause
                 Surface(
                     shape = RoundedCornerShape(50),
                     color = PrimaryOrange,
@@ -199,6 +215,7 @@ fun FullPlayerScreen(
                     )
                 }
 
+                // Next
                 IconButton(
                     onClick = { playerViewModel.skipNext() },
                     modifier = Modifier.size(48.dp)
@@ -208,6 +225,23 @@ fun FullPlayerScreen(
                         contentDescription = "Next",
                         modifier = Modifier.size(
                             36.dp
+                        )
+                    )
+                }
+
+                // Repeat
+                IconButton(onClick = { playerViewModel.toggleRepeat() }) {
+                    val icon =
+                        if (repeatMode == Player.REPEAT_MODE_ONE) Icons.Default.RepeatOne else Icons.Default.Repeat
+                    val tint =
+                        if (repeatMode != Player.REPEAT_MODE_OFF) PrimaryOrange else MaterialTheme.colorScheme.onSurface
+
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Repeat",
+                        tint = tint,
+                        modifier = Modifier.size(
+                            24.dp
                         )
                     )
                 }

@@ -1,7 +1,5 @@
 package com.mubashshir.lokalmusic.service
 
-import android.content.Intent
-import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -19,15 +17,19 @@ class LokalMusicService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        mediaSession = MediaSession.Builder(this, player).build()
+        // Build the MediaSession with a Callback to handle connections
+        mediaSession =
+            MediaSession.Builder(this, player)
+                .setCallback(
+                    CustomMediaSessionCallback()
+                )
+                .build()
     }
 
-    // The service must return the session to allow UI controls to work
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
 
-    // Cleanup when the service is destroyed
     override fun onDestroy() {
         mediaSession?.run {
             player.release()
@@ -35,5 +37,21 @@ class LokalMusicService : MediaSessionService() {
             mediaSession = null
         }
         super.onDestroy()
+    }
+
+    // Custom Callback to handle connection requests
+    private inner class CustomMediaSessionCallback :
+        MediaSession.Callback
+    {
+        override fun onConnect(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo
+        ): MediaSession.ConnectionResult
+        {
+            // Accept all connection requests from the app and system
+            return MediaSession.ConnectionResult.AcceptedResultBuilder(
+                session
+            ).build()
+        }
     }
 }

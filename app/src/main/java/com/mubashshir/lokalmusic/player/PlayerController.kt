@@ -21,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,22 +37,42 @@ class PlayerController @Inject constructor(
     private var mediaController: MediaController? =
         null
 
+    // --- State Flows ---
+
     private val _currentSong =
         MutableStateFlow<Result?>(null)
     val currentSong: StateFlow<Result?> =
-        _currentSong
+        _currentSong.asStateFlow()
 
     private val _isPlaying =
         MutableStateFlow(false)
-    val isPlaying: StateFlow<Boolean> = _isPlaying
+    val isPlaying: StateFlow<Boolean> =
+        _isPlaying.asStateFlow()
 
     private val _duration = MutableStateFlow(0L)
-    val duration: StateFlow<Long> = _duration
+    val duration: StateFlow<Long> =
+        _duration.asStateFlow()
 
     private val _playbackPosition =
         MutableStateFlow(0L)
     val playbackPosition: StateFlow<Long> =
-        _playbackPosition
+        _playbackPosition.asStateFlow()
+
+    private val _shuffleMode =
+        MutableStateFlow(false)
+    val shuffleMode: StateFlow<Boolean> =
+        _shuffleMode.asStateFlow()
+
+    private val _repeatMode =
+        MutableStateFlow(Player.REPEAT_MODE_OFF)
+    val repeatMode: StateFlow<Int> =
+        _repeatMode.asStateFlow()
+
+    // --- Internal State ---
+
+    // We keep a local copy of the queue to map MediaItems back to Result objects
+    private var currentQueue: List<Result> =
+        emptyList()
 
     private val scope =
         CoroutineScope(Dispatchers.Main)
@@ -64,9 +85,6 @@ class PlayerController @Inject constructor(
 
     private fun initialize()
     {
-        // FIXED: Removed manual startForegroundService call to prevent ANR/Crash.
-        // The MediaController will bind to the service automatically.
-
         val sessionToken = SessionToken(
             context,
             ComponentName(
@@ -118,8 +136,31 @@ class PlayerController @Inject constructor(
                 reason: Int
             )
             {
-                // Update current song when track changes
-                updateCurrentSongFromQueue()
+                // When the player moves to the next song (automatically or manually),
+                // we use the mediaId to find the Result object in our queue.
+                mediaItem?.let { item ->
+                    val song =
+                        currentQueue.find { it.id == item.mediaId }
+                    if (song != null)
+                    {
+                        _currentSong.value = song
+                    }
+                }
+            }
+
+            override fun onShuffleModeEnabledChanged(
+                shuffleModeEnabled: Boolean
+            )
+            {
+                _shuffleMode.value =
+                    shuffleModeEnabled
+            }
+
+            override fun onRepeatModeChanged(
+                repeatMode: Int
+            )
+            {
+                _repeatMode.value = repeatMode
             }
         })
     }
@@ -142,41 +183,12 @@ class PlayerController @Inject constructor(
         }
     }
 
-    private fun updateCurrentSongFromQueue()
-    {
-        // This is called when queue changes - for now we rely on playSong/playQueue
-        // to set currentSong. In a full implementation, you'd track the queue here.
-    }
+    // --- Playback Controls ---
 
     fun playSong(song: Result)
     {
-        _currentSong.value = song
-
-        val streamUrl =
-            song.downloadUrl.getStreamUrl()
-        if (streamUrl.isEmpty()) return
-
-        val mediaItem = MediaItem.Builder()
-            .setUri(streamUrl)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.name)
-                    .setArtist(song.artists.primary.firstOrNull()?.name)
-                    .setAlbumTitle(song.album.name)
-                    .setArtworkUri(
-                        Uri.parse(
-                            song.image.find { it.quality == "500x500" }?.url
-                                ?: song.image.firstOrNull()?.url
-                                ?: ""
-                        )
-                    )
-                    .build()
-            )
-            .build()
-
-        mediaController?.setMediaItem(mediaItem)
-        mediaController?.prepare()
-        mediaController?.play()
+        // Playing a single song is just playing a queue of size 1
+        playQueue(listOf(song), 0)
     }
 
     fun playQueue(
@@ -186,44 +198,62 @@ class PlayerController @Inject constructor(
     {
         if (songs.isEmpty()) return
 
+        currentQueue = songs
+        _currentSong.value = songs[startIndex]
+
         val mediaItems = songs.map { song ->
             MediaItem.Builder()
-                .setUri(song.downloadUrl.getStreamUrl())
+                .setMediaId(song.id) // IMPORTANT: Set ID for mapping back later
+                .setUri(song.downloadUrl.getStreamUrl()) // Use streaming URL
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(song.name)
                         .setArtist(song.artists.primary.firstOrNull()?.name)
                         .setAlbumTitle(song.album.name)
+                        .setArtworkUri(
+                            Uri.parse(
+                                song.image.find { it.quality == "500x500" }?.url
+                                    ?: song.image.firstOrNull()?.url
+                                    ?: ""
+                            )
+                        )
                         .build()
                 )
                 .build()
         }
 
-        _currentSong.value = songs[startIndex]
-
-        mediaController?.setMediaItems(
-            mediaItems,
-            startIndex,
-            0L
-        )
-        mediaController?.prepare()
-        mediaController?.play()
+        mediaController?.let { controller ->
+            controller.setMediaItems(
+                mediaItems,
+                startIndex,
+                0L
+            )
+            controller.prepare()
+            controller.play()
+        }
     }
 
     fun togglePlayPause()
     {
-        if (_isPlaying.value) mediaController?.pause()
-        else mediaController?.play()
+        mediaController?.let {
+            if (it.isPlaying) it.pause() else it.play()
+        }
     }
 
     fun next()
     {
-        mediaController?.seekToNextMediaItem()
+        if (mediaController?.hasNextMediaItem() == true)
+        {
+            mediaController?.seekToNextMediaItem()
+        }
     }
 
     fun previous()
     {
-        mediaController?.seekToPreviousMediaItem()
+        if (mediaController?.hasPreviousMediaItem() == true)
+        {
+            mediaController?.seekToPreviousMediaItem()
+        }
     }
 
     fun seekTo(positionMs: Float)
@@ -231,6 +261,30 @@ class PlayerController @Inject constructor(
         val position =
             (positionMs * (_duration.value)).toLong()
         mediaController?.seekTo(position)
+    }
+
+    // --- Shuffle & Repeat ---
+
+    fun toggleShuffle()
+    {
+        mediaController?.let {
+            val isEnabled = !it.shuffleModeEnabled
+            it.shuffleModeEnabled = isEnabled
+        }
+    }
+
+    fun toggleRepeat()
+    {
+        mediaController?.let {
+            val nextMode = when (it.repeatMode)
+            {
+                Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
+                Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
+                Player.REPEAT_MODE_ONE -> Player.REPEAT_MODE_OFF
+                else                   -> Player.REPEAT_MODE_OFF
+            }
+            it.repeatMode = nextMode
+        }
     }
 
     fun release()

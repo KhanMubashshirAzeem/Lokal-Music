@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.R
-import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.ui.components.ErrorView
 import com.mubashshir.lokalmusic.ui.components.LoadingView
 import com.mubashshir.lokalmusic.ui.screens.home.HomeViewModel

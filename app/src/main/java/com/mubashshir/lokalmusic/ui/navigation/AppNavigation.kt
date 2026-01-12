@@ -15,8 +15,8 @@ import com.mubashshir.lokalmusic.ui.components.FullPlayerScreen
 import com.mubashshir.lokalmusic.ui.screens.FavoritesScreen
 import com.mubashshir.lokalmusic.ui.screens.PlaylistsScreen
 import com.mubashshir.lokalmusic.ui.screens.SettingsScreen
-import com.mubashshir.lokalmusic.ui.screens.album.AlbumDetailScreen
 import com.mubashshir.lokalmusic.ui.screens.home.HomeScreen
+import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.album.AlbumDetailScreen
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists.ArtistDetailScreen
 import com.mubashshir.lokalmusic.ui.screens.search.SearchScreen
 

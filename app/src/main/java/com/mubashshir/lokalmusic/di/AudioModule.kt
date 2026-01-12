@@ -30,7 +30,7 @@ object AudioModule {
         audioAttributes: AudioAttributes
     ): ExoPlayer =
         ExoPlayer.Builder(context)
-            .setAudioAttributes(audioAttributes, true) // Handle audio focus (calls, notifications)
-            .setHandleAudioBecomingNoisy(true) // Pause when headphones are unplugged
+            .setAudioAttributes(audioAttributes, true)
+            .setHandleAudioBecomingNoisy(true)
             .build()
 }

@@ -4,7 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.data.model.Result
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
@@ -28,26 +28,17 @@ data class ArtistDetailData(
 class ArtistDetailViewModel @Inject constructor(
     private val repository: SongRepository,
     private val playerController: PlayerController
-) : ViewModel()
-{
+) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow<UiState<ArtistDetailData>>(
-            UiState.Loading
-        )
-    val uiState: StateFlow<UiState<ArtistDetailData>> =
-        _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<ArtistDetailData>>(UiState.Loading)
+    val uiState: StateFlow<UiState<ArtistDetailData>> = _uiState.asStateFlow()
 
-    private val _currentSongId =
-        MutableStateFlow<String?>(null)
-    val currentSongId: StateFlow<String?> =
-        _currentSongId.asStateFlow()
+    private val _currentSongId = MutableStateFlow<String?>(null)
+    val currentSongId: StateFlow<String?> = _currentSongId.asStateFlow()
 
-    val isPlaying: StateFlow<Boolean> =
-        playerController.isPlaying
+    val isPlaying: StateFlow<Boolean> = playerController.isPlaying
 
-    init
-    {
+    init {
         viewModelScope.launch {
             playerController.currentSong.collectLatest { song ->
                 _currentSongId.value = song?.id
@@ -55,47 +46,66 @@ class ArtistDetailViewModel @Inject constructor(
         }
     }
 
-    fun loadArtist(artistId: String)
-    {
+    fun loadArtist(artistId: String) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
 
             repository.getArtistSongs(artistId)
                 .collectLatest { result ->
                     result.onSuccess { songs ->
-                        if (songs.isNotEmpty())
-                        {
-                            val firstSong =
-                                songs.first()
-                            _uiState.value =
-                                UiState.Success(
-                                    ArtistDetailData(
-                                        artistName = firstSong.artists.primary.firstOrNull()?.name
-                                            ?: "Unknown Artist",
-                                        artistImageUrl = firstSong.image.find { it.quality == "500x500" }?.url
-                                            ?: "",
-                                        songs = songs,
-                                        songCount = songs.size
-                                    )
+                        if (songs.isNotEmpty()) {
+                            val firstSong = songs.first()
+                            _uiState.value = UiState.Success(
+                                ArtistDetailData(
+                                    artistName = firstSong.artists.primary.firstOrNull()?.name
+                                        ?: "Unknown Artist",
+                                    artistImageUrl = firstSong.image.find { it.quality == "500x500" }?.url
+                                        ?: "",
+                                    songs = songs,
+                                    songCount = songs.size
                                 )
-                        } else
-                        {
-                            _uiState.value =
-                                UiState.Error("No songs found for this artist")
+                            )
+                        } else {
+                            _uiState.value = UiState.Error("No songs found for this artist")
                         }
                     }.onFailure {
-                        _uiState.value =
-                            UiState.Error(
-                                it.message
-                                    ?: "Failed to load artist"
-                            )
+                        _uiState.value = UiState.Error(it.message ?: "Failed to load artist")
                     }
                 }
         }
     }
 
-    fun playSong(song: Result)
-    {
-        playerController.playSong(song)
+    // UPDATED: Plays the specific song but includes the whole list in the queue
+    fun playSong(song: Result) {
+        val currentState = _uiState.value
+        if (currentState is UiState.Success) {
+            val songs = currentState.data.songs
+            val index = songs.indexOfFirst { it.id == song.id }
+            if (index != -1) {
+                playerController.playQueue(songs, index)
+            }
+        }
+    }
+
+    // NEW: Plays all songs from the start
+    fun playArtist() {
+        val currentState = _uiState.value
+        if (currentState is UiState.Success) {
+            val songs = currentState.data.songs
+            if (songs.isNotEmpty()) {
+                playerController.playQueue(songs, 0)
+            }
+        }
+    }
+
+    // NEW: Shuffles the songs and plays
+    fun shuffleArtist() {
+        val currentState = _uiState.value
+        if (currentState is UiState.Success) {
+            val songs = currentState.data.songs
+            if (songs.isNotEmpty()) {
+                playerController.playQueue(songs.shuffled(), 0)
+            }
+        }
     }
 }

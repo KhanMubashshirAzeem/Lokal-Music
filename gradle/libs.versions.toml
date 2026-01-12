@@ -25,7 +25,7 @@ media3 = "1.4.0"
 # UI - image loading
 coil = "2.6.0"
 benchmarkCommon = "1.4.1"
-foundation = "1.10.0"
+#foundation = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,7 +62,7 @@ media3-common = { group = "androidx.media3", name = "media3-common", version.ref
 # UI
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-benchmark-common = { group = "androidx.benchmark", name = "benchmark-common", version.ref = "benchmarkCommon" }
-androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 
 
 [plugins]

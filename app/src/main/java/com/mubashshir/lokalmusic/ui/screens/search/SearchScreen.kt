@@ -20,7 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.data.model.Result
 import com.mubashshir.lokalmusic.ui.components.SearchBar
 import com.mubashshir.lokalmusic.ui.components.SongList
@@ -65,7 +65,7 @@ fun SearchScreen(
             )
 
             when (uiState) {
-                is com.mubashshir.lokalmusic.UiState.Loading -> {
+                is UiState.Loading -> {
                     // Loading state
                     Text(
                         "Searching...",
@@ -73,7 +73,7 @@ fun SearchScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-                is com.mubashshir.lokalmusic.UiState.Success -> {
+                is UiState.Success -> {
                     SongList(
                         songs = (uiState as UiState.Success<List<Result>>).data,
                         currentSongId = currentSongId,
@@ -84,7 +84,7 @@ fun SearchScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-                is com.mubashshir.lokalmusic.UiState.Error -> {
+                is UiState.Error   -> {
                     Text(
                         "Error: ${(uiState as UiState.Error).message}",
                         modifier = Modifier.padding(PaddingMedium),

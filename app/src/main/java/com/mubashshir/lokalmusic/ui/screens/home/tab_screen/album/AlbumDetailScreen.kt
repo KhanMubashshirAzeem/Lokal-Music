@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.screens.album
+package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.album
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -36,8 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.R
-import com.mubashshir.lokalmusic.UiState
+import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.ui.components.SongList
+import com.mubashshir.lokalmusic.ui.screens.album.AlbumDetailViewModel
 import com.mubashshir.lokalmusic.ui.theme.PaddingLarge
 import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
@@ -106,10 +107,10 @@ fun AlbumDetailScreen(
                             model = data.albumImageUrl,
                             contentDescription = data.albumName,
                             modifier = Modifier
-                                .size(300.dp)
+                                .size(240.dp)
                                 .clip(
                                     RoundedCornerShape(
-                                        16.dp
+                                        8.dp
                                     )
                                 ),
                             contentScale = ContentScale.Crop,

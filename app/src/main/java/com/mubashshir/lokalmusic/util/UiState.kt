@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic
+package com.mubashshir.lokalmusic.util
 
 /**
  * Generic UiState sealed interface for all screens.
