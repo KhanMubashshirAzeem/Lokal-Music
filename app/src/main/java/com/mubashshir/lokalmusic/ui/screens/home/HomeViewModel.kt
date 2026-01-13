@@ -4,16 +4,17 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.data.model.Result
 import com.mubashshir.lokalmusic.data.model.SimpleArtist
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
+import com.mubashshir.lokalmusic.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,24 +29,37 @@ data class HorizontalItem(
 data class HomeData(
     val artists: List<HorizontalItem>,
     val mostPlayed: List<HorizontalItem>,
-    val recentlyPlayed: List<HorizontalItem>
+    val recentlyPlayed: List<HorizontalItem>,
+    // NEW: Added full song lists to pass to the "See All" tabs
+    val mostPlayedSongs: List<Result> = emptyList(),
+    val recentlyPlayedSongs: List<Result> = emptyList()
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: SongRepository,
-    private val playerController: PlayerController // 1. Inject PlayerController
+    private val playerController: PlayerController
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<HomeData>>(UiState.Loading)
     val uiState: StateFlow<UiState<HomeData>> = _uiState.asStateFlow()
 
-    // 2. Local cache to store full Song objects so we can play them by ID
-    private val songCache =
-        mutableMapOf<String, Result>()
+    private val _currentSongId =
+        MutableStateFlow<String?>(null)
+    val currentSongId: StateFlow<String?> =
+        _currentSongId.asStateFlow()
+
+    val isPlaying = playerController.isPlaying
 
     init {
         fetchData()
+
+        // Observe current song to highlight in lists
+        viewModelScope.launch {
+            playerController.currentSong.collectLatest { song ->
+                _currentSongId.value = song?.id
+            }
+        }
     }
 
     private fun fetchData() {
@@ -62,7 +76,14 @@ class HomeViewModel @Inject constructor(
                         .first()
                 }
                 val recentlyDeferred = async {
-                    repository.searchSongs("recently played")
+                    repository.searchSongs(
+                        "?",
+                        "recently played"
+                    ).first()
+                }
+
+                val mostDeferred = async {
+                    repository.searchSongs("most played")
                         .first()
                 }
 
@@ -70,6 +91,8 @@ class HomeViewModel @Inject constructor(
                 val songsResult = songsDeferred.await()
                 val recentlyResult =
                     recentlyDeferred.await()
+                val mostResult =
+                    mostDeferred.await()
 
                 if (artistsResult.isSuccess && songsResult.isSuccess)
                 {
@@ -82,34 +105,36 @@ class HomeViewModel @Inject constructor(
                                 )
                             } ?: emptyList()
 
-                    // Process Top Songs
-                    val mostPlayed =
-                        songsResult.getOrNull()
-                            ?.map { song ->
-                                songCache[song.id] =
-                                    song // Cache the song
-                                mapSongToHorizontalItem(
-                                    song
-                                )
-                            } ?: emptyList()
-
-                    // Process Recently Played
-                    val recentlyPlayed =
+                    // Store full Result objects
+                    val mostPlayedFull =
+                        mostResult.getOrNull()
+                            ?: emptyList()
+                    val recentlyPlayedFull =
                         recentlyResult.getOrNull()
-                            ?.map { song ->
-                                songCache[song.id] =
-                                    song // Cache the song
-                                mapSongToHorizontalItem(
-                                    song
-                                )
-                            } ?: emptyList()
+                            ?: emptyList()
+
+                    // Map to HorizontalItems for the Carousel
+                    val mostPlayedItems =
+                        mostPlayedFull.map {
+                            mapSongToHorizontalItem(
+                                it
+                            )
+                        }
+                    val recentlyPlayedItems =
+                        recentlyPlayedFull.map {
+                            mapSongToHorizontalItem(
+                                it
+                            )
+                        }
 
                     _uiState.value =
                         UiState.Success(
                             HomeData(
                                 artists = artists,
-                                mostPlayed = mostPlayed,
-                                recentlyPlayed = recentlyPlayed
+                                mostPlayed = mostPlayedItems,
+                                recentlyPlayed = recentlyPlayedItems,
+                                mostPlayedSongs = mostPlayedFull,      // Pass full list
+                                recentlyPlayedSongs = recentlyPlayedFull // Pass full list
                         )
                         )
                 } else
@@ -127,14 +152,38 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    // 3. New function to play song by ID
     @RequiresApi(Build.VERSION_CODES.O)
     fun playSong(songId: String)
     {
-        val song = songCache[songId]
-        if (song != null)
+        val state = _uiState.value
+        if (state is UiState.Success)
         {
-            playerController.playSong(song)
+            val song =
+                state.data.mostPlayedSongs.find { it.id == songId }
+                    ?: state.data.recentlyPlayedSongs.find { it.id == songId }
+
+            if (song != null)
+            {
+                playerController.playSong(song)
+            }
+        }
+    }
+
+    // Play from the "See All" list (supports Next/Previous)
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun playTrackList(
+        songs: List<Result>,
+        selectedSong: Result
+    )
+    {
+        val index =
+            songs.indexOfFirst { it.id == selectedSong.id }
+        if (index != -1)
+        {
+            playerController.playQueue(
+                songs,
+                index
+            )
         }
     }
 

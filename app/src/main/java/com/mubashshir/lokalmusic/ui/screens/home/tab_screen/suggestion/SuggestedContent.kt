@@ -1,4 +1,4 @@
-package com.mubashshir.lokalmusic.ui.screens.home.tab_screen
+package com.mubashshir.lokalmusic.ui.screens.home.tab_screen.suggestion
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -49,7 +49,9 @@ fun SuggestedContent(
     onArtistClick: (String) -> Unit = {},
     onAlbumClick: (String) -> Unit = {},
     onSongClick: (String) -> Unit = {},
-    onSeeAllArtists: () -> Unit = {} // Added Callback
+    onSeeAllArtists: () -> Unit = {},
+    onSeeAllRecentlyPlayed: () -> Unit = {}, // NEW
+    onSeeAllMostPlayed: () -> Unit = {}      // NEW
 )
 {
     val homeUiState by homeViewModel.uiState.collectAsState()
@@ -71,7 +73,9 @@ fun SuggestedContent(
                 onArtistClick = onArtistClick,
                 onAlbumClick = onAlbumClick,
                 onSongClick = onSongClick,
-                onSeeAllArtists = onSeeAllArtists
+                onSeeAllArtists = onSeeAllArtists,
+                onSeeAllRecentlyPlayed = onSeeAllRecentlyPlayed,
+                onSeeAllMostPlayed = onSeeAllMostPlayed
             )
         }
 
@@ -93,7 +97,9 @@ private fun SuggestedContentSuccess(
     onArtistClick: (String) -> Unit,
     onAlbumClick: (String) -> Unit,
     onSongClick: (String) -> Unit,
-    onSeeAllArtists: () -> Unit
+    onSeeAllArtists: () -> Unit,
+    onSeeAllRecentlyPlayed: () -> Unit,
+    onSeeAllMostPlayed: () -> Unit
 )
 {
     Column(
@@ -109,7 +115,7 @@ private fun SuggestedContentSuccess(
         {
             SectionHeader(
                 title = "Recently Played",
-                onSeeAllClick = {}
+                onSeeAllClick = onSeeAllRecentlyPlayed
             )
             HorizontalCarousel(
                 items = recentlyPlayed,
@@ -127,13 +133,14 @@ private fun SuggestedContentSuccess(
         {
             SectionHeader(
                 title = "Artists",
-                onSeeAllClick = onSeeAllArtists // Trigger callback
+                onSeeAllClick = onSeeAllArtists
             )
             HorizontalCarousel(
                 items = artists,
                 onItemClick = { item ->
-                    // CHANGED: Pass item.title (Name) instead of ID for search
-                    onArtistClick(item.title)
+                    onArtistClick(
+                        item.title
+                    )
                 }
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -144,7 +151,7 @@ private fun SuggestedContentSuccess(
         {
             SectionHeader(
                 title = "Most Played",
-                onSeeAllClick = {}
+                onSeeAllClick = onSeeAllMostPlayed
             )
             HorizontalCarousel(
                 items = mostPlayed,

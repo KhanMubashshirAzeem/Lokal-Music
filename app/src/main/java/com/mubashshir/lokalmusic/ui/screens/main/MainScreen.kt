@@ -28,7 +28,7 @@ import com.mubashshir.lokalmusic.ui.components.BottomNavItem
 import com.mubashshir.lokalmusic.ui.components.ConnectivityBanner
 import com.mubashshir.lokalmusic.ui.navigation.AppNavigation
 import com.mubashshir.lokalmusic.ui.navigation.Screen
-import com.mubashshir.lokalmusic.ui.player.MiniPlayer
+import com.mubashshir.lokalmusic.ui.screens.player.MiniPlayer
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

@@ -14,7 +14,6 @@ sealed class Screen(val route: String) {
 
     object ArtistDetail : Screen("artist_detail/{artistId}") {
         fun createRoute(artistId: String): String {
-            // FIXED: Encode the ID to handle spaces and special characters safely
             return "artist_detail/${Uri.encode(artistId)}"
         }
     }

@@ -21,67 +21,62 @@ class SongRepositoryImpl @Inject constructor(
 
     private val TAG = "SongRepositoryImpl"
 
-    override fun searchSongs(query: String): Flow<kotlin.Result<List<SongModel>>> =
-        flow {
-            Log.d(
-                TAG,
-                "searchSongs called with query: $query"
+    override fun searchSongs(
+        query: String, name: String?
+    ): Flow<kotlin.Result<List<SongModel>>> = flow {
+        Log.d(
+            TAG, "searchSongs called with query: $query"
+        )
+        try
+        {
+            val response = apiService.searchSongs(
+                query, name
             )
-            try
+            if (response.success)
             {
-                val response =
-                    apiService.searchSongs(query)
-                if (response.success)
-                {
-                    val results =
-                        response.data.results
-                    Log.d(
-                        TAG,
-                        "searchSongs success: Found ${results.size} songs"
+                val results = response.data.results
+                Log.d(
+                    TAG,
+                    "searchSongs success: Found ${results.size} songs"
+                )
+                emit(
+                    kotlin.Result.success(
+                        results
                     )
-                    emit(
-                        kotlin.Result.success(
-                            results
-                        )
-                    )
-                } else
-                {
-                    Log.e(
-                        TAG,
-                        "searchSongs failed: API returned success=false"
-                    )
-                    emit(
-                        kotlin.Result.failure(
-                            Exception("API returned success=false")
-                        )
-                    )
-                }
-            } catch (e: Exception)
+                )
+            } else
             {
                 Log.e(
                     TAG,
-                    "searchSongs exception: ${e.message}",
-                    e
+                    "searchSongs failed: API returned success=false"
                 )
-                emit(kotlin.Result.failure(e))
+                emit(
+                    kotlin.Result.failure(
+                        Exception("API returned success=false")
+                    )
+                )
             }
-        }.flowOn(Dispatchers.IO)
+        } catch (e: Exception)
+        {
+            Log.e(
+                TAG, "searchSongs exception: ${e.message}", e
+            )
+            emit(kotlin.Result.failure(e))
+        }
+    }.flowOn(Dispatchers.IO)
 
     override fun getAlbum(albumId: String): Flow<kotlin.Result<AlbumResponse>> =
         flow {
             Log.d(
-                TAG,
-                "getAlbum called with ID: $albumId"
+                TAG, "getAlbum called with ID: $albumId"
             )
             try
             {
-                val response =
-                    apiService.getAlbum(albumId)
+                val response = apiService.getAlbum(albumId)
                 if (response.success && response.data != null)
                 {
                     Log.d(
-                        TAG,
-                        "getAlbum success: ${response.data.name}"
+                        TAG, "getAlbum success: ${response.data.name}"
                     )
                     emit(
                         kotlin.Result.success(
@@ -103,9 +98,7 @@ class SongRepositoryImpl @Inject constructor(
             } catch (e: Exception)
             {
                 Log.e(
-                    TAG,
-                    "getAlbum exception: ${e.message}",
-                    e
+                    TAG, "getAlbum exception: ${e.message}", e
                 )
                 emit(kotlin.Result.failure(e))
             }
@@ -114,15 +107,13 @@ class SongRepositoryImpl @Inject constructor(
     override fun getPlaylist(playlistId: String): Flow<kotlin.Result<PlaylistResponse>> =
         flow {
             Log.d(
-                TAG,
-                "getPlaylist called with ID: $playlistId"
+                TAG, "getPlaylist called with ID: $playlistId"
             )
             try
             {
-                val response =
-                    apiService.getPlaylist(
-                        playlistId
-                    )
+                val response = apiService.getPlaylist(
+                    playlistId
+                )
                 if (response.success && response.data != null)
                 {
                     Log.d(
@@ -149,9 +140,7 @@ class SongRepositoryImpl @Inject constructor(
             } catch (e: Exception)
             {
                 Log.e(
-                    TAG,
-                    "getPlaylist exception: ${e.message}",
-                    e
+                    TAG, "getPlaylist exception: ${e.message}", e
                 )
                 emit(kotlin.Result.failure(e))
             }
@@ -160,17 +149,14 @@ class SongRepositoryImpl @Inject constructor(
     override fun searchArtists(query: String): Flow<kotlin.Result<List<SimpleArtist>>> =
         flow {
             Log.d(
-                TAG,
-                "searchArtists called with query: $query"
+                TAG, "searchArtists called with query: $query"
             )
             try
             {
-                val response =
-                    apiService.searchArtists(query)
+                val response = apiService.searchArtists(query)
                 if (response.success)
                 {
-                    val results =
-                        response.data.results
+                    val results = response.data.results
                     Log.d(
                         TAG,
                         "searchArtists success: Found ${results.size} artists"
@@ -195,9 +181,7 @@ class SongRepositoryImpl @Inject constructor(
             } catch (e: Exception)
             {
                 Log.e(
-                    TAG,
-                    "searchArtists exception: ${e.message}",
-                    e
+                    TAG, "searchArtists exception: ${e.message}", e
                 )
                 emit(kotlin.Result.failure(e))
             }
@@ -206,17 +190,14 @@ class SongRepositoryImpl @Inject constructor(
     override fun searchAlbums(query: String): Flow<kotlin.Result<List<SimpleAlbum>>> =
         flow {
             Log.d(
-                TAG,
-                "searchAlbums called with query: $query"
+                TAG, "searchAlbums called with query: $query"
             )
             try
             {
-                val response =
-                    apiService.searchAlbums(query)
+                val response = apiService.searchAlbums(query)
                 if (response.success)
                 {
-                    val results =
-                        response.data.results
+                    val results = response.data.results
                     Log.d(
                         TAG,
                         "searchAlbums success: Found ${results.size} albums"
@@ -241,9 +222,7 @@ class SongRepositoryImpl @Inject constructor(
             } catch (e: Exception)
             {
                 Log.e(
-                    TAG,
-                    "searchAlbums exception: ${e.message}",
-                    e
+                    TAG, "searchAlbums exception: ${e.message}", e
                 )
                 emit(kotlin.Result.failure(e))
             }
@@ -252,19 +231,16 @@ class SongRepositoryImpl @Inject constructor(
     override fun searchPlaylists(query: String): Flow<kotlin.Result<List<SimplePlaylist>>> =
         flow {
             Log.d(
-                TAG,
-                "searchPlaylists called with query: $query"
+                TAG, "searchPlaylists called with query: $query"
             )
             try
             {
-                val response =
-                    apiService.searchPlaylists(
-                        query
-                    )
+                val response = apiService.searchPlaylists(
+                    query
+                )
                 if (response.success)
                 {
-                    val results =
-                        response.data.results
+                    val results = response.data.results
                     Log.d(
                         TAG,
                         "searchPlaylists success: Found ${results.size} playlists"
@@ -289,9 +265,7 @@ class SongRepositoryImpl @Inject constructor(
             } catch (e: Exception)
             {
                 Log.e(
-                    TAG,
-                    "searchPlaylists exception: ${e.message}",
-                    e
+                    TAG, "searchPlaylists exception: ${e.message}", e
                 )
                 emit(kotlin.Result.failure(e))
             }
@@ -300,20 +274,17 @@ class SongRepositoryImpl @Inject constructor(
     override fun getArtistSongs(artistId: String): Flow<kotlin.Result<List<SongModel>>> =
         flow {
             Log.d(
-                TAG,
-                "getArtistSongs called with ID: $artistId"
+                TAG, "getArtistSongs called with ID: $artistId"
             )
             try
             {
-                val response =
-                    apiService.getArtistSongs(
-                        artistId
-                    )
+                val response = apiService.getArtistSongs(
+                    artistId
+                )
                 if (response.success)
                 {
                     val results =
-                        response.data?.results
-                            ?: emptyList()
+                        response.data?.results ?: emptyList()
                     Log.d(
                         TAG,
                         "getArtistSongs success: Found ${results.size} songs"
@@ -338,9 +309,7 @@ class SongRepositoryImpl @Inject constructor(
             } catch (e: Exception)
             {
                 Log.e(
-                    TAG,
-                    "getArtistSongs exception: ${e.message}",
-                    e
+                    TAG, "getArtistSongs exception: ${e.message}", e
                 )
                 emit(kotlin.Result.failure(e))
             }

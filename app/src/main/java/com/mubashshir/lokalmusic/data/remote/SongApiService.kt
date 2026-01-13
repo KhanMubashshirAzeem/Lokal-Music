@@ -13,7 +13,8 @@ interface SongApiService {
 
     @GET("api/search/songs")
     suspend fun searchSongs(
-        @Query("query") query: String
+        @Query("query") query: String,
+        @Query("name") name: String? = null
     ): SongsApiResponce
 
     @GET("api/albums")
@@ -41,8 +42,6 @@ interface SongApiService {
         @Query("query") query: String
     ): PlaylistsApiResponse
 
-    // CHANGED: From @Path("id") to @Query("id") based on Postman snippet "api/artists/songs"
-    // This will generate: https://saavn.sumit.co/api/artists/songs?id={artistId}
     @GET("api/artists/songs?")
     suspend fun getArtistSongs(
         @Query("id") id: String,

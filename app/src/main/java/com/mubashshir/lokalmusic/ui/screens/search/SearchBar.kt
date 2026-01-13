@@ -1,5 +1,5 @@
 // ui/components/SearchBar.kt (new)
-package com.mubashshir.lokalmusic.ui.components
+package com.mubashshir.lokalmusic.ui.screens.search
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

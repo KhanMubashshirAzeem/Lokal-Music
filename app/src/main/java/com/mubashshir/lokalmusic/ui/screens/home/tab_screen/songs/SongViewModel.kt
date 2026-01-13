@@ -60,9 +60,25 @@ class SongViewModel @Inject constructor(
         }
     }
 
+    // UPDATED: Plays the song queue starting from this song to enable Next/Prev
     fun playSong(song: Result)
     {
-        playerController.playSong(song)
+        val currentList = _songs.value
+        val index =
+            currentList.indexOfFirst { it.id == song.id }
+
+        if (index != -1)
+        {
+            // Pass the full list and the specific index to start playing
+            playerController.playQueue(
+                currentList,
+                index
+            )
+        } else
+        {
+            // Fallback if song not in list (unlikely in this screen)
+            playerController.playSong(song)
+        }
     }
 
     fun playAllSongs()

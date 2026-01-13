@@ -21,16 +21,21 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.SuggestedContent
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.album.AlbumsContent
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.artists.ArtistsContent
 import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.songs.SongScreen
+import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.suggestion.MostPlayedTab
+import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.suggestion.RecentlyPlayedTab
+import com.mubashshir.lokalmusic.ui.screens.home.tab_screen.suggestion.SuggestedContent
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
+import com.mubashshir.lokalmusic.util.UiState
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -40,7 +45,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToArtist: (String) -> Unit = {}, // This String is now the Artist Name
+    onNavigateToArtist: (String) -> Unit = {},
     onNavigateToAlbum: (String) -> Unit = {},
     onNavigateToFullPlayer: () -> Unit = {}
 ) {
@@ -55,6 +60,11 @@ fun HomeScreen(
     val pagerState =
         rememberPagerState { tabs.size }
     val scope = rememberCoroutineScope()
+
+    // Collect UI state to pass data to tabs
+    val uiState by viewModel.uiState.collectAsState()
+    val currentSongId by viewModel.currentSongId.collectAsState()
+    val isPlaying by viewModel.isPlaying.collectAsState()
 
     Column(modifier = modifier.fillMaxSize()) {
 
@@ -86,7 +96,8 @@ fun HomeScreen(
 
         ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface,
+            edgePadding = 0.dp
         ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
@@ -119,15 +130,26 @@ fun HomeScreen(
                     onArtistClick = onNavigateToArtist,
                     onAlbumClick = onNavigateToAlbum,
                     onSongClick = { songId ->
-                        viewModel.playSong(
-                            songId
-                        )
+                        viewModel.playSong(songId)
                     },
                     onSeeAllArtists = {
-                        // Switch to "Artists" tab (index 2)
                         scope.launch {
                             pagerState.animateScrollToPage(
                                 2
+                            )
+                        }
+                    },
+                    onSeeAllRecentlyPlayed = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                4
+                            )
+                        }
+                    },
+                    onSeeAllMostPlayed = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                5
                             )
                         }
                     }
@@ -143,6 +165,49 @@ fun HomeScreen(
                     onNavigateToAlbum = onNavigateToAlbum
                 )
 
+                4 ->
+                {
+                    // Recently Played Tab
+                    val songs =
+                        if (uiState is UiState.Success)
+                        {
+                            (uiState as UiState.Success<HomeData>).data.recentlyPlayedSongs
+                        } else emptyList()
+
+                    RecentlyPlayedTab(
+                        songs = songs,
+                        currentSongId = currentSongId,
+                        isPlaying = isPlaying,
+                        onSongClick = { song ->
+                            viewModel.playTrackList(
+                                songs,
+                                song
+                            )
+                        }
+                    )
+                }
+
+                5 ->
+                {
+                    // Most Played Tab
+                    val songs =
+                        if (uiState is UiState.Success)
+                        {
+                            (uiState as UiState.Success<HomeData>).data.mostPlayedSongs
+                        } else emptyList()
+
+                    MostPlayedTab(
+                        songs = songs,
+                        currentSongId = currentSongId,
+                        isPlaying = isPlaying,
+                        onSongClick = { song ->
+                            viewModel.playTrackList(
+                                songs,
+                                song
+                            )
+                        }
+                    )
+                }
             }
         }
     }

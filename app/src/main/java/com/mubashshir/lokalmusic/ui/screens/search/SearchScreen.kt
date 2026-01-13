@@ -20,11 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.mubashshir.lokalmusic.util.UiState
 import com.mubashshir.lokalmusic.data.model.Result
-import com.mubashshir.lokalmusic.ui.components.SearchBar
 import com.mubashshir.lokalmusic.ui.components.SongList
+import com.mubashshir.lokalmusic.ui.theme.PaddingLarge
 import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
+import com.mubashshir.lokalmusic.util.UiState
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +61,10 @@ fun SearchScreen(
                 onClear = { viewModel.clearSearch() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(PaddingMedium)
+                    .padding(
+                        vertical = PaddingMedium, horizontal =
+                            PaddingLarge
+                    )
             )
 
             when (uiState) {
@@ -96,3 +99,5 @@ fun SearchScreen(
         }
     }
 }
+
+
