@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
 import com.mubashshir.lokalmusic.util.UiState
@@ -43,10 +43,10 @@ class SearchViewModel @Inject constructor(
     var searchQuery by mutableStateOf("")
         private set
 
-    private val _uiState = MutableStateFlow<UiState<List<Result>>>(
+    private val _uiState = MutableStateFlow<UiState<List<Results>>>(
         UiState.Success(emptyList())
     )
-    val uiState: StateFlow<UiState<List<Result>>> =
+    val uiState: StateFlow<UiState<List<Results>>> =
         _uiState.asStateFlow()
 
     private val _currentSongId = MutableStateFlow<String?>(null)
@@ -107,7 +107,7 @@ class SearchViewModel @Inject constructor(
         _uiState.value = UiState.Success(emptyList())
     }
 
-    fun playSong(song: Result)
+    fun playSong(song: Results)
     {
         playerController.playSong(song)
     }

@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mubashshir.lokalmusic.util.UiState
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +21,7 @@ data class AlbumDetailData(
     val artistName: String,
     val albumImageUrl: String,
     val year: String,
-    val songs: List<Result>
+    val songs: List<Results>
 )
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -47,7 +47,7 @@ class AlbumDetailViewModel @Inject constructor(
     val isPlaying: StateFlow<Boolean> =
         playerController.isPlaying
 
-    private var albumSongs: List<Result> =
+    private var albumSongs: List<Results> =
         emptyList()
 
     init
@@ -105,7 +105,7 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 
-    fun playSong(song: Result)
+    fun playSong(song: Results)
     {
         playerController.playSong(song)
     }

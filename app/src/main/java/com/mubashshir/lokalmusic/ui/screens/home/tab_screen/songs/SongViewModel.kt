@@ -4,7 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,8 +24,8 @@ class SongViewModel @Inject constructor(
 {
 
     private val _songs =
-        MutableStateFlow<List<Result>>(emptyList())
-    val songs: StateFlow<List<Result>> =
+        MutableStateFlow<List<Results>>(emptyList())
+    val songs: StateFlow<List<Results>> =
         _songs.asStateFlow()
 
     private val _currentSongId =
@@ -61,7 +61,7 @@ class SongViewModel @Inject constructor(
     }
 
     // UPDATED: Plays the song queue starting from this song to enable Next/Prev
-    fun playSong(song: Result)
+    fun playSong(song: Results)
     {
         val currentList = _songs.value
         val index =

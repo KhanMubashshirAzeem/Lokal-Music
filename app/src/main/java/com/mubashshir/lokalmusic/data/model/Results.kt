@@ -1,6 +1,6 @@
 package com.mubashshir.lokalmusic.data.model
 
-data class Result(
+data class Results(
     val album: Album,
     val artists: Artists,
     val copyright: String,

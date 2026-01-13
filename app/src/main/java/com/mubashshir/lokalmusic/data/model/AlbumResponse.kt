@@ -13,6 +13,6 @@ data class AlbumData(
     val year: String?,
     val label: String?,
     val language: String?,
-    val songs: List<Result>,          // ← same Result as song (great reuse!)
+    val songs: List<Results>,          // ← same Result as song (great reuse!)
     // ... more fields if needed (artists, playCount, etc.)
 )

@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mubashshir.lokalmusic.util.UiState
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import javax.inject.Inject
 data class ArtistDetailData(
     val artistName: String,
     val artistImageUrl: String,
-    val songs: List<Result>,
+    val songs: List<Results>,
     val songCount: Int
 )
 
@@ -83,7 +83,7 @@ class ArtistDetailViewModel @Inject constructor(
         }
     }
     // UPDATED: Plays the specific song but includes the whole list in the queue
-    fun playSong(song: Result) {
+    fun playSong(song: Results) {
         val currentState = _uiState.value
         if (currentState is UiState.Success) {
             val songs = currentState.data.songs

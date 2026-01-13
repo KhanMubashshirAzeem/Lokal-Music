@@ -1,7 +1,6 @@
 package com.mubashshir.lokalmusic.ui.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -30,7 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 
@@ -45,11 +44,11 @@ import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
  */
 @Composable
 fun SongList(
-    songs: List<Result>,
+    songs: List<Results>,
     currentSongId: String? = null,
     isPlaying: Boolean = false,
-    onSongClick: (Result) -> Unit,
-    onMoreClick: ((Result) -> Unit)? = null,
+    onSongClick: (Results) -> Unit,
+    onMoreClick: ((Results) -> Unit)? = null,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
@@ -71,7 +70,7 @@ fun SongList(
 
 @Composable
 private fun SongListItem(
-    song: Result,
+    song: Results,
     isSelected: Boolean,
     isPlaying: Boolean,
     onClick: () -> Unit,

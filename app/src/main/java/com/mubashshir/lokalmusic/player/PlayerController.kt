@@ -11,7 +11,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.model.getStreamUrl
 import com.mubashshir.lokalmusic.service.LokalMusicService
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,8 +40,8 @@ class PlayerController @Inject constructor(
     // --- State Flows ---
 
     private val _currentSong =
-        MutableStateFlow<Result?>(null)
-    val currentSong: StateFlow<Result?> =
+        MutableStateFlow<Results?>(null)
+    val currentSong: StateFlow<Results?> =
         _currentSong.asStateFlow()
 
     private val _isPlaying =
@@ -71,7 +71,7 @@ class PlayerController @Inject constructor(
     // --- Internal State ---
 
     // We keep a local copy of the queue to map MediaItems back to Result objects
-    private var currentQueue: List<Result> =
+    private var currentQueue: List<Results> =
         emptyList()
 
     private val scope =
@@ -185,14 +185,14 @@ class PlayerController @Inject constructor(
 
     // --- Playback Controls ---
 
-    fun playSong(song: Result)
+    fun playSong(song: Results)
     {
         // Playing a single song is just playing a queue of size 1
         playQueue(listOf(song), 0)
     }
 
     fun playQueue(
-        songs: List<Result>,
+        songs: List<Results>,
         startIndex: Int = 0
     )
     {

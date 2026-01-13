@@ -4,7 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.model.SimpleArtist
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
@@ -30,10 +30,11 @@ data class HomeData(
     val artists: List<HorizontalItem>,
     val mostPlayed: List<HorizontalItem>,
     val recentlyPlayed: List<HorizontalItem>,
-    // NEW: Added full song lists to pass to the "See All" tabs
-    val mostPlayedSongs: List<Result> = emptyList(),
-    val recentlyPlayedSongs: List<Result> = emptyList()
+    val mostPlayedSongs: List<Results> = emptyList(),
+    val recentlyPlayedSongs: List<Results> = emptyList()
 )
+
+@RequiresApi(Build.VERSION_CODES.O)
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -172,8 +173,8 @@ class HomeViewModel @Inject constructor(
     // Play from the "See All" list (supports Next/Previous)
     @RequiresApi(Build.VERSION_CODES.O)
     fun playTrackList(
-        songs: List<Result>,
-        selectedSong: Result
+        songs: List<Results>,
+        selectedSong: Results
     )
     {
         val index =
@@ -187,7 +188,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun mapSongToHorizontalItem(song: Result): HorizontalItem {
+    private fun mapSongToHorizontalItem(song: Results): HorizontalItem {
         return HorizontalItem(
             id = song.id,
             title = song.name,

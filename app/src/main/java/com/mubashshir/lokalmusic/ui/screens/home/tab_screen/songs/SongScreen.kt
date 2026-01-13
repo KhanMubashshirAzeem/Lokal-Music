@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
 import com.mubashshir.lokalmusic.ui.theme.PaddingSmall
 import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
@@ -160,7 +160,7 @@ fun SongScreen(
 
 @Composable
 private fun SongItem(
-    song: Result,
+    song: Results,
     isSelected: Boolean,
     isPlaying: Boolean,
     onClick: () -> Unit

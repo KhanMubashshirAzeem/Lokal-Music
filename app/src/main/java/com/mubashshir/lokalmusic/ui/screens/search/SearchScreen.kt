@@ -20,7 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.ui.components.SongList
 import com.mubashshir.lokalmusic.ui.theme.PaddingLarge
 import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
@@ -78,7 +78,7 @@ fun SearchScreen(
                 }
                 is UiState.Success -> {
                     SongList(
-                        songs = (uiState as UiState.Success<List<Result>>).data,
+                        songs = (uiState as UiState.Success<List<Results>>).data,
                         currentSongId = currentSongId,
                         isPlaying = isPlaying,
                         onSongClick = { song ->

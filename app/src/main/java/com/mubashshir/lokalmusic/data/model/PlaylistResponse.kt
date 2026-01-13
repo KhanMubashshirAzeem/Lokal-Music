@@ -12,6 +12,6 @@ data class PlaylistData(
     val image: List<ImageXX>,
     val followerCount: Int?,
     val songCount: Int?,
-    val songs: List<Result>,          // ← again, reuse Result
+    val songs: List<Results>,          // ← again, reuse Result
     // ... more fields (description, user, etc.)
 )

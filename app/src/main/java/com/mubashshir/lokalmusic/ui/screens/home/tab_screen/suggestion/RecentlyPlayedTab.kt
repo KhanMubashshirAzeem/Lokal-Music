@@ -8,16 +8,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.mubashshir.lokalmusic.data.model.Result
+import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.ui.components.SongList
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RecentlyPlayedTab(
-    songs: List<Result>,
+    songs: List<Results>,
     currentSongId: String?,
     isPlaying: Boolean,
-    onSongClick: (Result) -> Unit
+    onSongClick: (Results) -> Unit
 ) {
     if (songs.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
