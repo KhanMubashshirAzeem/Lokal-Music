@@ -40,6 +40,7 @@ import com.mubashshir.lokalmusic.ui.components.ErrorView
 import com.mubashshir.lokalmusic.ui.components.LoadingView
 import com.mubashshir.lokalmusic.ui.screens.home.HomeViewModel
 import com.mubashshir.lokalmusic.ui.screens.home.HorizontalItem
+import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
 import com.mubashshir.lokalmusic.util.UiState
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -187,7 +188,7 @@ fun SectionHeader(
         )
         Text(
             text = "See All",
-            color = MaterialTheme.colorScheme.primary,
+            color = PrimaryOrange,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.clickable { onSeeAllClick() }
         )
@@ -225,7 +226,7 @@ fun HorizontalCarousel(
                         ),
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(
-                        R.drawable.ic_place_holder
+                        R.drawable.ic_music_holder
                     ),
                     error = painterResource(R.drawable.ic_place_holder)
                 )

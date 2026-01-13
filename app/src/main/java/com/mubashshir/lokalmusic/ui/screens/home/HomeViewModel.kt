@@ -8,6 +8,7 @@ import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.model.SimpleArtist
 import com.mubashshir.lokalmusic.data.repository.SongRepository
 import com.mubashshir.lokalmusic.player.PlayerController
+import com.mubashshir.lokalmusic.ui.screens.base.BaseViewModel
 import com.mubashshir.lokalmusic.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -40,7 +41,7 @@ data class HomeData(
 class HomeViewModel @Inject constructor(
     private val repository: SongRepository,
     private val playerController: PlayerController
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<HomeData>>(UiState.Loading)
     val uiState: StateFlow<UiState<HomeData>> = _uiState.asStateFlow()
@@ -148,6 +149,7 @@ class HomeViewModel @Inject constructor(
                         UiState.Error(errorMessage)
                 }
             } catch (e: Exception) {
+                handleThrowable(e)
                 _uiState.value = UiState.Error(e.message ?: "Failed to load data")
             }
         }

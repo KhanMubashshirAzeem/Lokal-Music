@@ -1,5 +1,6 @@
 package com.mubashshir.lokalmusic.di
 
+import com.mubashshir.lokalmusic.data.interceptor.ErrorInterceptor
 import com.mubashshir.lokalmusic.data.remote.SongApiService
 import dagger.Module
 import dagger.Provides
@@ -18,13 +19,25 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder().build()
+    fun provideErrorInterceptor(): ErrorInterceptor {
+        return ErrorInterceptor()
     }
 
     @Provides
     @Singleton
-    fun provideSongApiService(okHttpClient: OkHttpClient): SongApiService {
+    fun provideOkHttpClient(
+        errorInterceptor: ErrorInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(errorInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSongApiService(
+        okHttpClient: OkHttpClient
+    ): SongApiService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)

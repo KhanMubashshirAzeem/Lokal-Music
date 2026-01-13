@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -29,6 +31,11 @@ import com.mubashshir.lokalmusic.ui.components.ConnectivityBanner
 import com.mubashshir.lokalmusic.ui.navigation.AppNavigation
 import com.mubashshir.lokalmusic.ui.navigation.Screen
 import com.mubashshir.lokalmusic.ui.screens.player.MiniPlayer
+import com.mubashshir.lokalmusic.ui.theme.BackgroundGray
+import com.mubashshir.lokalmusic.ui.theme.CardWhite
+import com.mubashshir.lokalmusic.ui.theme.PrimaryOrange
+import com.mubashshir.lokalmusic.ui.theme.TextPrimary
+import com.mubashshir.lokalmusic.ui.theme.TextSecondary
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -64,23 +71,45 @@ fun MainScreen(
     Scaffold(
         bottomBar = {
             if (shouldShowBottomNav) {
-                NavigationBar {
+                NavigationBar(
+                    modifier = Modifier,
+                    containerColor = BackgroundGray,
+                    contentColor = TextPrimary,
+                    tonalElevation = 0.dp
+                ) {
                     items.forEach { item ->
-                        val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                        NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = null) },
-                            label = { Text(item.label) },
-                            selected = isSelected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                        val isSelected =
+                            (currentDestination?.hierarchy?.any { it.route == item.route } == true).also {
+
+                                NavigationBarItem(
+                                    selected = it,
+                                    onClick = {
+                                        navController.navigate(item.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    label = {
+                                        Text(text = item.label)
+                                    },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = PrimaryOrange,
+                                        selectedTextColor = PrimaryOrange,
+                                        unselectedIconColor = TextSecondary,
+                                        unselectedTextColor = TextSecondary,
+                                        indicatorColor = CardWhite
+                                    )
+                                )
                             }
-                        )
                     }
                 }
             }

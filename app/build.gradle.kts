@@ -94,6 +94,7 @@ dependencies {
     implementation("androidx.paging:paging-runtime:3.3.6")
     implementation("androidx.paging:paging-compose:3.3.6")
 
+
     /* -------------------- Testing -------------------- */
     testImplementation(libs.junit)
 
