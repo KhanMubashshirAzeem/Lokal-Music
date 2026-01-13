@@ -1,9 +1,13 @@
 package com.mubashshir.lokalmusic.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.mubashshir.lokalmusic.data.model.AlbumResponse
 import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.data.model.SimpleAlbum
 import com.mubashshir.lokalmusic.data.model.SimpleArtist
+import com.mubashshir.lokalmusic.data.paging.SongPagingSource
 import com.mubashshir.lokalmusic.data.remote.SongApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +39,27 @@ class SongRepositoryImpl @Inject constructor(
             emit(Result.failure(e))
         }
     }.flowOn(Dispatchers.IO)
+
+    fun searchSongsPaged(
+        query: String,
+        name: String? = null,
+        pageSize: Int = 20
+    ): Flow<PagingData<Results>>
+    {
+        return Pager(
+            config = PagingConfig(
+                pageSize = pageSize,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                SongPagingSource(
+                    songApiService = apiService,
+                    query = query,
+                    name = name
+                )
+            }
+        ).flow
+    }
 
     override fun getAlbum(
         albumId: String

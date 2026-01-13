@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -29,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +41,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.mubashshir.lokalmusic.data.model.Results
 import com.mubashshir.lokalmusic.ui.theme.PaddingMedium
@@ -65,20 +65,15 @@ enum class SortOption(val displayName: String) {
 fun SongScreen(
     viewModel: SongViewModel = hiltViewModel()
 ) {
-    val songs by viewModel.songs.collectAsState()
+    val songs = viewModel.songs.collectAsLazyPagingItems()
     val currentSongId by viewModel.currentSongId.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
 
     var currentSort by remember { mutableStateOf(SortOption.ASCENDING) }
     var showSortMenu by remember { mutableStateOf(false) }
 
-    // Load songs on first composition
-    LaunchedEffect(Unit) {
-        viewModel.searchSongs("arijit")
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
-        // Sort Row
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -90,14 +85,13 @@ fun SongScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${songs.size} songs",
+                text = "${songs.itemCount} songs",
                 style = MaterialTheme.typography.titleMedium
             )
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                    showSortMenu = true
-                }
+                modifier = Modifier.clickable { showSortMenu = true }
             ) {
                 Text(
                     text = currentSort.displayName,
@@ -112,9 +106,7 @@ fun SongScreen(
 
             DropdownMenu(
                 expanded = showSortMenu,
-                onDismissRequest = {
-                    showSortMenu = false
-                }
+                onDismissRequest = { showSortMenu = false }
             ) {
                 SortOption.entries.forEach { option ->
                     DropdownMenuItem(
@@ -128,31 +120,48 @@ fun SongScreen(
             }
         }
 
-        // Song List
         LazyColumn(
-            contentPadding = PaddingValues(
-                PaddingMedium
-            )
+            contentPadding = PaddingValues(PaddingMedium)
         ) {
-            items(songs) { song ->
+            items(songs.itemCount) { index ->
+                val song = songs[index] ?: return@items
+
                 SongItem(
                     song = song,
                     isSelected = song.id == currentSongId,
                     isPlaying = isPlaying && song.id == currentSongId,
-                    onClick = {
-                        viewModel.playSong(
-                            song
-                        )
-                    }
+                    onClick = { viewModel.playSong(song) }
                 )
             }
-            // Extra space for mini player
+
+            when (songs.loadState.append)
+            {
+                is LoadState.Loading ->
+                {
+                    item {
+                        Text(
+                            "Loading more...",
+                            modifier = Modifier.padding(PaddingMedium)
+                        )
+                    }
+                }
+
+                is LoadState.Error   ->
+                {
+                    item {
+                        Text(
+                            "Failed to load more songs",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(PaddingMedium)
+                        )
+                    }
+                }
+
+                else                 -> Unit
+            }
+
             item {
-                Spacer(
-                    modifier = Modifier.height(
-                        80.dp
-                    )
-                )
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
